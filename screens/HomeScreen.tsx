@@ -8,20 +8,17 @@ import {
   ScrollView,
   TextInputChangeEvent,
 } from "react-native";
-import "./global.css";
+import "../global.css";
 
-const App = () => {
+const HomeScreen = () => {
   const [tareas, setTareas] = useState([
-    { id: 1, texto: "Monkeypox1", completada: false },
-    { id: 2, texto: "Aldiablo", completada: false },
-    { id: 3, texto: "Thereactor ", completada: true },
+    { id: 1, texto: "Tarea Incompleta 1", completada: false },
+    { id: 2, texto: "Tarea Incompleta 2", completada: false },
+    { id: 3, texto: "Tarea Completada", completada: true },
   ]);
 
   const [nuevaTarea, setNuevaTarea] = useState("");
 
-  {
-    /* Funcion para agregar una nueva tarea */
-  }
   const agregarTarea = () => {
     if (nuevaTarea.trim() === "") return;
     const tarea = {
@@ -34,10 +31,6 @@ const App = () => {
     setNuevaTarea("");
   };
 
-  {
-    /* Toggle Cambiar el valor de completado 
-        haciendo click en el checkbox*/
-  }
   const toogleTarea = (id) => {
     setTareas(
       tareas.map((tarea) =>
@@ -45,9 +38,7 @@ const App = () => {
       )
     );
   };
-  {
-    /*Eliminar una tarea*/
-  }
+
   const eliminarTarea = (id) => {
     setTareas(tareas.filter((tarea) => tarea.id !== id));
   };
@@ -56,9 +47,6 @@ const App = () => {
     setNuevaTarea(e.nativeEvent.text);
   };
 
-  {
-    /* Estados de Resumen*/
-  }
   const tareasCompletadas = tareas.filter((item) => item.completada).length;
   const totalTareas = tareas.length;
   return (
@@ -82,37 +70,45 @@ const App = () => {
         </TouchableOpacity>
       </View>
       <ScrollView className="mb-16">
-        {tareas.map((tarea) => (
-          <View
-            key={tarea.id}
-            className="flex-row items-center justify-between bg-purple-200 mb-4 p-4 rounded-xl"
-          >
-            <TouchableOpacity
-              className={`w-6 h-6 border-2 rounded-full mr-4  ${
-                tarea.completada
-                  ? "bg-green-500 border-green-500"
-                  : "border-gray-400"
-              }`}
-              onPress={() => toogleTarea(tarea.id)}
-            ></TouchableOpacity>
-            <Text
-              className={`flex-1 text-lg ${
-                tarea.completada
-                  ? "text-gray-400 line-through"
-                  : "text-gray-900"
-              }`}
-            >
-              {tarea.texto}
+        {tareas.length === 0 ? (
+          <View className="items-center mt-10">
+            <Text className="text-gray-200 text-lg font-bold">
+              No hay tareas, crea una nueva!
             </Text>
-            <TouchableOpacity onPress={() => eliminarTarea(tarea.id)}>
-              <Text className="text-red-500 font-bold text-lg">X</Text>
-            </TouchableOpacity>
           </View>
-        ))}
+        ) : (
+          tareas.map((tarea) => (
+            <View
+              key={tarea.id}
+              className="flex-row items-center justify-between bg-purple-200 mb-4 p-4 rounded-xl"
+            >
+              <TouchableOpacity
+                className={`w-6 h-6 border-2 rounded-full mr-4  ${
+                  tarea.completada
+                    ? "bg-green-500 border-green-500"
+                    : "border-gray-400"
+                }`}
+                onPress={() => toogleTarea(tarea.id)}
+              ></TouchableOpacity>
+              <Text
+                className={`flex-1 text-lg ${
+                  tarea.completada
+                    ? "text-gray-400 line-through"
+                    : "text-gray-900"
+                }`}
+              >
+                {tarea.texto}
+              </Text>
+              <TouchableOpacity onPress={() => eliminarTarea(tarea.id)}>
+                <Text className="text-red-500 font-bold text-lg">X</Text>
+              </TouchableOpacity>
+            </View>
+          ))
+        )}
       </ScrollView>
       <StatusBar style="auto" />
     </View>
   );
 };
 
-export default App;
+export default HomeScreen;
