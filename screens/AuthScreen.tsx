@@ -4,13 +4,18 @@ import {
   TextInput,
   TextInputChangeEvent,
   TouchableOpacity,
+  Alert,
+  Keyboard,
+  TouchableWithoutFeedback,
 } from "react-native";
 import React, { Dispatch, SetStateAction, useState } from "react";
 import { logIn } from "api/apiService";
+import { useRouter } from "expo-router";
 
 const AuthScreen = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const router = useRouter();
   const handleOnChangeTextInput = (
     e: TextInputChangeEvent,
     func: Dispatch<SetStateAction<string>>
@@ -18,37 +23,48 @@ const AuthScreen = () => {
     func(e.nativeEvent.text);
   };
   const handleOnPressLogIn = async () => {
-    console.log("Logging in with", { email, password });
-    const message = await logIn({ email, password });
-    console.log(message);
-    setEmail("");
-    setPassword("");
+    Keyboard.dismiss();
+    try {
+      console.log("Logging in with", { email, password });
+      const message = await logIn({ email, password });
+      if (message == "Bienvenido") {
+        Alert.alert("Bienvenido");
+        router.replace("/capturar");
+      }
+      setEmail("");
+      setPassword("");
+    } catch (e) {
+      Alert.alert("Error al iniciar sesión", "Revisa tus credenciales");
+      console.error("Login failed:", e);
+    }
   };
   return (
-    <View className="flex-1 justify-center items-center bg-blue-950">
-      <Text className="color-white">Login</Text>
-      <TextInput
-        className="border-2 border-white w-3/4 p-2 my-2 rounded text-white"
-        value={email}
-        onChange={(e) => handleOnChangeTextInput(e, setEmail)}
-        placeholder="Email"
-        placeholderTextColor={"gray"}
-      ></TextInput>
-      <TextInput
-        className="border-2 border-white w-3/4 p-2 my-2 rounded text-white"
-        value={password}
-        onChange={(e) => handleOnChangeTextInput(e, setPassword)}
-        placeholder="Password"
-        secureTextEntry
-        placeholderTextColor={"gray"}
-      ></TextInput>
-      <TouchableOpacity
-        className="bg-white px-4 py-2 rounded mt-4"
-        onPress={handleOnPressLogIn}
-      >
-        <Text>Log In</Text>
-      </TouchableOpacity>
-    </View>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View className="flex-1 justify-center items-center bg-red-900">
+        <Text className="color-white">Login</Text>
+        <TextInput
+          className="border-2 border-white w-3/4 p-2 my-2 rounded text-white"
+          value={email}
+          onChange={(e) => handleOnChangeTextInput(e, setEmail)}
+          placeholder="Email"
+          placeholderTextColor={"gray"}
+        ></TextInput>
+        <TextInput
+          className="border-2 border-white w-3/4 p-2 my-2 rounded text-white"
+          value={password}
+          onChange={(e) => handleOnChangeTextInput(e, setPassword)}
+          placeholder="Password"
+          secureTextEntry
+          placeholderTextColor={"gray"}
+        ></TextInput>
+        <TouchableOpacity
+          className="bg-white px-4 py-2 rounded mt-4"
+          onPress={handleOnPressLogIn}
+        >
+          <Text>Log In</Text>
+        </TouchableOpacity>
+      </View>
+    </TouchableWithoutFeedback>
   );
 };
 
