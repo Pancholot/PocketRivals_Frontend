@@ -1,4 +1,5 @@
 import { Tabs } from "expo-router";
+import { Image } from "react-native";
 
 export default function TabsLayout() {
   return (
@@ -14,34 +15,88 @@ export default function TabsLayout() {
           fontSize: 14,
           fontWeight: "bold",
         },
+        tabBarActiveTintColor: "#FF0000",
+        tabBarInactiveTintColor: "#999999",
       }}
     >
       <Tabs.Screen
-        // 1. Amigos
-        name="amigos" // Se enlaza al archivo app/(tabs)/amigos.tsx
+        name="amigos"
         options={{
-          title: "Amigos", // Este es el texto que se mostrará
+          title: "Amigos",
+          tabBarIcon: ({}) => (
+            <Image
+              source={require("@/assets/icons/amigos.png")}
+              style={{
+                width: 35,
+                height: 35,
+              }}
+            />
+          ),
+          tabBarLabelStyle: {
+            marginTop: 4,
+            fontSize: 14,
+            fontWeight: "bold",
+          },
         }}
       />
       <Tabs.Screen
-        // 2. Capturar
-        name="capturar" // Se enlaza al archivo app/(tabs)/capturar.tsx
+        name="capturar"
         options={{
           title: "Capturar",
+          tabBarIcon: ({}) => (
+            <Image
+              source={require("@/assets/icons/pokeball.png")}
+              style={{
+                width: 35,
+                height: 35,
+              }}
+            />
+          ),
+          tabBarLabelStyle: {
+            marginTop: 4,
+            fontSize: 14,
+            fontWeight: "bold",
+          },
         }}
       />
       <Tabs.Screen
-        // 3. Pokemon
-        name="pokemon" // Se enlaza al archivo app/(tabs)/pokemon.tsx
+        name="pokemon"
         options={{
           title: "Pokemon",
+          tabBarIcon: ({}) => (
+            <Image
+              source={require("@/assets/icons/pokemon.png")}
+              style={{
+                width: 35,
+                height: 35,
+              }}
+            />
+          ),
+          tabBarLabelStyle: {
+            marginTop: 4,
+            fontSize: 14,
+            fontWeight: "bold",
+          },
         }}
       />
       <Tabs.Screen
-        // 4. Ajustes
-        name="ajustes" // Se enlaza al archivo app/(tabs)/ajustes.tsx
+        name="ajustes"
         options={{
           title: "Ajustes",
+          tabBarIcon: ({}) => (
+            <Image
+              source={require("@/assets/icons/settings.png")}
+              style={{
+                width: 35,
+                height: 35,
+              }}
+            />
+          ),
+          tabBarLabelStyle: {
+            marginTop: 4,
+            fontSize: 14,
+            fontWeight: "bold",
+          },
         }}
       />
     </Tabs>

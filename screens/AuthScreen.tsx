@@ -26,30 +26,25 @@ const AuthScreen = () => {
   };
   const handleOnPressLogIn = async () => {
     Keyboard.dismiss();
-    try {
+    /*try {
       console.log("Logging in with", { email, password });
       const message = await logIn({ email, password });
       if (message == "Bienvenido") {
-        Alert.alert("Bienvenido");
-        router.replace("/capturar");
-      }
+        Alert.alert("Bienvenido");*/
+    router.replace("/capturar");
+    /*}
       setEmail("");
       setPassword("");
     } catch (e) {
       Alert.alert("Error al iniciar sesión", e.message);
       console.error("Login failed:", e);
-    }
+    }*/
   };
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <ImageBackground
-        source={require("../assets/background.jpg")} // 👈 tu imagen local
-        resizeMode="cover" // o "contain" según el efecto que quieras
-        className="flex-1 justify-center items-center"
-      ></ImageBackground>
       <View className="flex-1 justify-center items-center bg-red-900">
         <Image
-          source={require("../assets/pokeball_icon.png")} // path to your local image
+          source={require("@/assets/icons/pokeball_icon.png")} // path to your local image
           style={{ width: 200, height: 200, marginBottom: 20 }}
           resizeMode="contain"
         />

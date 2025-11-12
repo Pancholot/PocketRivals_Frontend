@@ -1,10 +1,10 @@
-import { View, Text } from "react-native";
+import { View, Text, Image, TouchableOpacity, ScrollView } from "react-native";
 import React from "react";
 
 const pokemon = () => {
   return (
     <View>
-      <Text>pokemon</Text>
+      <Text>Pokémon</Text>
     </View>
   );
 };
