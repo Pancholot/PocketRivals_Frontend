@@ -9,6 +9,7 @@ import {
   TouchableWithoutFeedback,
   Image,
   ImageBackground,
+  StyleSheet,
 } from "react-native";
 import React, { Dispatch, SetStateAction, useState } from "react";
 import { logIn } from "api/apiService";
@@ -42,35 +43,48 @@ const AuthScreen = () => {
   };
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <View className="flex-1 justify-center items-center bg-red-900">
-        <Image
-          source={require("@/assets/icons/pokeball_icon.png")} // path to your local image
-          style={{ width: 200, height: 200, marginBottom: 20 }}
-          resizeMode="contain"
+      <ImageBackground
+        source={require("@/assets/backgrounds/auth.png")}
+        style={{ flex: 1 }}
+        resizeMode="cover"
+      >
+        <View
+          style={{
+            ...StyleSheet.absoluteFillObject,
+            backgroundColor: "rgba(0,0,0,0.60)",
+          }}
         />
-        <Text className="color-white">Login</Text>
-        <TextInput
-          className="border-2 border-white w-3/4 p-2 my-2 rounded text-white"
-          value={email}
-          onChange={(e) => handleOnChangeTextInput(e, setEmail)}
-          placeholder="Email"
-          placeholderTextColor={"white"}
-        ></TextInput>
-        <TextInput
-          className="border-2 border-white w-3/4 p-2 my-2 rounded text-white"
-          value={password}
-          onChange={(e) => handleOnChangeTextInput(e, setPassword)}
-          placeholder="Password"
-          secureTextEntry
-          placeholderTextColor={"white"}
-        ></TextInput>
-        <TouchableOpacity
-          className="bg-white px-4 py-2 rounded mt-4"
-          onPress={handleOnPressLogIn}
-        >
-          <Text>Log In</Text>
-        </TouchableOpacity>
-      </View>
+
+        <View className="flex-1 justify-center items-center ">
+          <Image
+            source={require("@/assets/icons/pokeball_icon.png")}
+            style={{ width: 200, height: 200, marginBottom: 20 }}
+            resizeMode="contain"
+          />
+          <Text className="color-white">Login</Text>
+          <TextInput
+            className="border-2 border-white w-3/4 p-2 my-2 rounded text-white"
+            value={email}
+            onChange={(e) => handleOnChangeTextInput(e, setEmail)}
+            placeholder="Email"
+            placeholderTextColor={"white"}
+          ></TextInput>
+          <TextInput
+            className="border-2 border-white w-3/4 p-2 my-2 rounded text-white"
+            value={password}
+            onChange={(e) => handleOnChangeTextInput(e, setPassword)}
+            placeholder="Password"
+            secureTextEntry
+            placeholderTextColor={"white"}
+          ></TextInput>
+          <TouchableOpacity
+            className="bg-white px-4 py-2 rounded mt-4"
+            onPress={handleOnPressLogIn}
+          >
+            <Text>Log In</Text>
+          </TouchableOpacity>
+        </View>
+      </ImageBackground>
     </TouchableWithoutFeedback>
   );
 };
