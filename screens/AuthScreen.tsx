@@ -34,7 +34,7 @@ const AuthScreen = () => {
       setEmail("");
       setPassword("");
     } catch (e) {
-      Alert.alert("Error al iniciar sesión", "Revisa tus credenciales");
+      Alert.alert("Error al iniciar sesión", e.message);
       console.error("Login failed:", e);
     }
   };
