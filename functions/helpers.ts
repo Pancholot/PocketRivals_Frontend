@@ -42,3 +42,9 @@ export const topValues = [
 export const selectRandomTop = (number: number) => {
   return topValues[number % topValues.length];
 };
+
+export const pokemonSprite = (id: number) => {
+  return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${
+    id
+  }.png`;
+};

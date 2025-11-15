@@ -11,22 +11,27 @@ import {
   ImageBackground,
   StyleSheet,
 } from "react-native";
-import React, { Dispatch, SetStateAction, useState } from "react";
+import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { logIn } from "api/apiService";
 import { useRouter } from "expo-router";
+import { useMusic } from "@/components/MusicContext";
 
 const AuthScreen = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const { playMusic } = useMusic();
   const router = useRouter();
+
   const handleOnChangeTextInput = (
     e: TextInputChangeEvent,
     func: Dispatch<SetStateAction<string>>
   ) => {
     func(e.nativeEvent.text);
   };
+
   const handleOnPressLogIn = async () => {
     Keyboard.dismiss();
+    await playMusic();
     /*try {
       console.log("Logging in with", { email, password });
       const message = await logIn({ email, password });
