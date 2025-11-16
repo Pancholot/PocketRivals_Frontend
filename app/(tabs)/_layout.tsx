@@ -15,6 +15,7 @@ export default function TabsLayout() {
           fontSize: 14,
           fontWeight: "bold",
         },
+
         tabBarActiveTintColor: "#FF0000",
         tabBarInactiveTintColor: "#999999",
       }}

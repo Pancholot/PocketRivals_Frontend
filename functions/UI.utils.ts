@@ -20,24 +20,24 @@ export const POKEMON_TYPE_COLORS = {
 };
 
 export const POKEMON_TYPE_BACKGROUNDS = {
-  normal: "linear-gradient(to top, #d3d3d3, #a8a878)", // Gris claro a marrón/beige
-  fire: "linear-gradient(to top, #ff7878, #f08030)", // Rojo anaranjado a naranja intenso
-  water: "linear-gradient(to top, #78c0ff, #6890f0)", // Azul claro a azul vibrante
-  electric: "linear-gradient(to top, #ffe678, #f8d030)", // Amarillo pálido a amarillo eléctrico
-  grass: "linear-gradient(to top, #a8ff78, #78c850)", // Verde claro a verde hierba
-  ice: "linear-gradient(to top, #e0f8f8, #98d8d8)", // Azul muy claro a cian
-  fighting: "linear-gradient(to top, #e8a098, #c03028)", // Rosa oscuro a rojo ladrillo
-  poison: "linear-gradient(to top, #d880d8, #a040a0)", // Lila claro a morado oscuro
-  ground: "linear-gradient(to top, #e8d898, #e0c068)", // Beige claro a marrón arena
-  flying: "linear-gradient(to top, #c8e0ff, #a890f0)", // Azul cielo a lila
-  psychic: "linear-gradient(to top, #ffb8c8, #f85888)", // Rosa pastel a rosa fuerte
-  bug: "linear-gradient(to top, #e0e890, #a8b820)", // Verde amarillento claro a verde oliva
-  rock: "linear-gradient(to top, #e0d0a0, #b8a038)", // Gris arena a marrón rocoso
-  ghost: "linear-gradient(to top, #b8a0d8, #705898)", // Morado grisáceo a morado oscuro
-  dragon: "linear-gradient(to top, #a890f8, #7038f8)", // Morado azulado a morado intenso
-  dark: "linear-gradient(to top, #a8a8a8, #705848)", // Gris oscuro a marrón oscuro
-  steel: "linear-gradient(to top, #e0e0e0, #b8b8d0)", // Gris plateado a gris acero
-  fairy: "linear-gradient(to top, #ffe0f8, #ee99ac)", // Rosa muy claro a rosa suave
+  normal: "bg-[#a8a878]",
+  fire: "bg-[#f08030]",
+  water: "bg-[#6890f0]",
+  electric: "bg-[#f8d030]",
+  grass: "bg-[#78c850]",
+  ice: "bg-[#98d8d8]",
+  fighting: "bg-[#c03028]",
+  poison: "bg-[#a040a0]",
+  ground: "bg-[#e0c068]",
+  flying: "bg-[#a890f0]",
+  psychic: "bg-[#f85888]",
+  bug: "bg-[#a8b820]",
+  rock: "bg-[#b8a038]",
+  ghost: "bg-[#705898]",
+  dragon: "bg-[#7038f8]",
+  dark: "bg-[#705848]",
+  steel: "bg-[#b8b8d0]",
+  fairy: "bg-[#ee99ac]",
 };
 
 export const YOUR_POKEMON_DATA = [

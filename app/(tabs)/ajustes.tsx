@@ -6,10 +6,13 @@ import { useState } from "react";
 import ScanQR from "@/components/scanQR";
 import { useMusic } from "@/components/MusicContext";
 import { useRouter } from "expo-router";
+import EditNameModal from "@/components/EditNameModal";
 
 const ajustes = () => {
   const userId = "12345";
-  const username = "AshKetchum";
+  const [username, setUsername] = useState("AshKetchum");
+  const [editingName, setEditingName] = useState(false);
+
   const profileImage = require("@/assets/icons/profilePic.png");
   const [showScanner, setShowScanner] = useState(false);
   const { isPlaying, playMusic, stopMusic } = useMusic();
@@ -34,7 +37,10 @@ const ajustes = () => {
         {/* Log out */}
         <TouchableOpacity
           className="border bg-black border-red-600 px-4 py-2 rounded-xl"
-          onPress={() => router.replace("/")}
+          onPress={() => {
+            stopMusic();
+            router.replace("/");
+          }}
         >
           <Text className="text-red-600 font-semibold">Log Out</Text>
         </TouchableOpacity>
@@ -46,9 +52,24 @@ const ajustes = () => {
       </View>
 
       {/* Nombre de Usuario */}
-      <View className="items-center mb-5">
-        <Text className="text-white text-xl font-bold">{username}</Text>
+      <View className="items-center mb-5 flex-row">
+        <Text className="text-white text-xl font-bold mr-2">{username}</Text>
+
+        <TouchableOpacity onPress={() => setEditingName(true)}>
+          <Feather name="edit" size={22} color="white" />
+        </TouchableOpacity>
       </View>
+
+      {/* Modal de edición */}
+      <EditNameModal
+        visible={editingName}
+        currentName={username}
+        onClose={() => setEditingName(false)}
+        onSave={(newName) => {
+          setUsername(newName);
+          setEditingName(false);
+        }}
+      />
 
       {/* ID y para Copiar la misma */}
       <View className="flex-row items-center mb-4">
