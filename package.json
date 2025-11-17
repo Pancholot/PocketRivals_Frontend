@@ -13,7 +13,7 @@
     "@types/react": "~19.1.10",
     "axios": "^1.12.2",
     "babel-preset-expo": "~54.0.0",
-    "expo": "54.0.17",
+    "expo": "^54.0.17",
     "expo-audio": "~1.0.14",
     "expo-av": "~16.0.7",
     "expo-camera": "~17.0.9",

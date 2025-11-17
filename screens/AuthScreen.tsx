@@ -52,8 +52,8 @@ const AuthScreen = () => {
   return (
     <ImageBackground
       source={require("@/assets/backgrounds/auth.png")}
-      style={{ flex: 1 }}
       resizeMode="cover"
+      className="h-full flex items-center justify-center"
     >
       <View
         style={{
@@ -62,45 +62,50 @@ const AuthScreen = () => {
         }}
       />
 
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-      >
-        <Pressable style={{ flex: 1 }} onPress={Keyboard.dismiss}>
-          <View className="flex-1 items-center justify-center px-4">
-            <Image
-              source={require("@/assets/icons/Logo.png")}
-              style={{ width: 350, height: 175, marginBottom: 2 }}
-              resizeMode="contain"
-            />
-            <Text className="color-white text-2xl font-bold  mb-2">Login</Text>
-            <Text className="color-slate-400 mb-2">
-              Bienvenido a nuestra App
+      <View className="flex items-center justify-center h-fit p-6 w-3/4 border-2 rounded-xl bg-red-800/60">
+        <Image
+          source={require("@/assets/icons/Logo.png")}
+          style={{ width: 350, height: 175, marginBottom: 2 }}
+          resizeMode="contain"
+        />
+        <Text className="color-white text-xl font-bold text-center mb-2">
+          ¡Bienvenido a Pocket Rivals!
+        </Text>
+        <TextInput
+          className="border-2 border-white p-2 my-2 rounded text-white w-full rounded-full"
+          value={email}
+          onChange={(e) => handleOnChangeTextInput(e, setEmail)}
+          placeholder="Email"
+          placeholderTextColor={"white"}
+        ></TextInput>
+        <TextInput
+          className="border-2 border-white  p-2 my-2 w-full text-white rounded-full"
+          value={password}
+          onChange={(e) => handleOnChangeTextInput(e, setPassword)}
+          placeholder="Password"
+          secureTextEntry
+          placeholderTextColor={"white"}
+        ></TextInput>
+        <TouchableOpacity
+          className="bg-yellow-300 w-full px-4 py-2 mt-4 rounded-full"
+          onPress={handleOnPressLogIn}
+        >
+          <Text className="text-center text-xl tracking-widest font-extrabold">
+            Iniciar sesión
+          </Text>
+        </TouchableOpacity>
+        <View className="mt-4 flex items-center justify-center w-full">
+          <Text className=" text-slate-300">Aún no tienes cuenta? </Text>
+          <TouchableOpacity
+            className="bg-slate-300 w-full px-4 py-2 mt-4 rounded-full"
+            onPress={handleOnPressLogIn}
+          >
+            <Text className="text-center text-xl tracking-widest font-extrabold">
+              Registrar
             </Text>
-            <TextInput
-              className="border-2 border-white w-3/4 p-2 my-2 rounded text-white"
-              value={email}
-              onChange={(e) => handleOnChangeTextInput(e, setEmail)}
-              placeholder="Email"
-              placeholderTextColor={"white"}
-            ></TextInput>
-            <TextInput
-              className="border-2 border-white w-3/4 p-2 my-2 rounded text-white"
-              value={password}
-              onChange={(e) => handleOnChangeTextInput(e, setPassword)}
-              placeholder="Password"
-              secureTextEntry
-              placeholderTextColor={"white"}
-            ></TextInput>
-            <TouchableOpacity
-              className="bg-white px-4 py-2 rounded mt-4"
-              onPress={handleOnPressLogIn}
-            >
-              <Text>Log In</Text>
-            </TouchableOpacity>
-          </View>
-        </Pressable>
-      </KeyboardAvoidingView>
+          </TouchableOpacity>
+        </View>
+      </View>
     </ImageBackground>
   );
 };
