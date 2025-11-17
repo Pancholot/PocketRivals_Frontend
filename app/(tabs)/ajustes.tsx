@@ -42,7 +42,7 @@ const ajustes = () => {
             router.replace("/");
           }}
         >
-          <Text className="text-red-600 font-semibold">Log Out</Text>
+          <Text className="text-red-600 font-semibold">Cerrar Sesión</Text>
         </TouchableOpacity>
       </View>
 
@@ -107,7 +107,7 @@ const ajustes = () => {
         className="bg-black border border-red-600 w-56 py-3 rounded-xl mt-4"
       >
         <Text className="text-center text-red-600 font-bold">
-          {isPlaying ? "Apagar Música" : "Prender Música"}
+          {isPlaying ? "Pausar Música" : "Prender Música"}
         </Text>
       </TouchableOpacity>
 

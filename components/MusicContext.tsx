@@ -20,10 +20,17 @@ export const MusicProvider = ({ children }) => {
   const [isPlaying, setIsPlaying] = useState(false);
 
   const playMusic = async () => {
+    if (sound && !isPlaying) {
+      await sound.playAsync();
+      setIsPlaying(true);
+      return;
+    }
+
     if (isPlaying) return;
 
     const { sound: s } = await Audio.Sound.createAsync(
-      require("@/assets/sounds/LittlerootTown.mp3")
+      require("@/assets/sounds/LittlerootTown.mp3"),
+      { isLooping: true }
     );
 
     setSound(s);
@@ -33,9 +40,7 @@ export const MusicProvider = ({ children }) => {
 
   const stopMusic = async () => {
     if (!isPlaying || !sound) return;
-    await sound.stopAsync();
-    await sound.unloadAsync();
-    setSound(null);
+    await sound.pauseAsync();
     setIsPlaying(false);
   };
 

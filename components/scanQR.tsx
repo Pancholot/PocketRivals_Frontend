@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { CameraView, useCameraPermissions } from "expo-camera";
 
 export default function ScanQR({ onScanned, onClose }) {
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
+
+  const isBlockedRef = useRef(false);
 
   if (!permission) {
     return (
@@ -50,16 +52,25 @@ export default function ScanQR({ onScanned, onClose }) {
     );
   }
 
+  const handleScan = ({ data }) => {
+    if (isBlockedRef.current) return;
+
+    isBlockedRef.current = true;
+    setScanned(true);
+
+    onScanned(data);
+
+    setTimeout(() => {
+      onClose();
+      isBlockedRef.current = false;
+    }, 200);
+  };
+
   return (
     <View className="flex-1 bg-black">
       <CameraView
         style={{ flex: 1 }}
-        onBarcodeScanned={({ data }) => {
-          if (scanned) return;
-          setScanned(true);
-          onScanned(data);
-          onClose();
-        }}
+        onBarcodeScanned={handleScan}
         barcodeScannerSettings={{ barcodeTypes: ["qr"] }}
       />
     </View>

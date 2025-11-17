@@ -27,7 +27,6 @@ const pokemon = () => {
         className="h-full w-full"
         renderItem={({ item }) => <PokemonCard pokemon={item} />}
       />
-      <IntroAnimeAd />
     </SafeAreaView>
   );
 };

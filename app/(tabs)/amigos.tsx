@@ -10,51 +10,43 @@ import { Feather } from "@expo/vector-icons";
 import { useState } from "react";
 import ScanQR from "@/components/scanQR";
 import IntroAnimeAd from "@/components/IntroAnimeAd";
+import { useRouter } from "expo-router";
+import { useFriendRequests } from "hooks/useFriendRequests";
+import { useFriends } from "hooks/useFriends";
 
 export default function Amigos() {
   const [showAddBox, setShowAddBox] = useState(false);
   const [friendId, setFriendId] = useState("");
   const [showScanner, setShowScanner] = useState(false);
+  const router = useRouter();
+  const { addRequest } = useFriendRequests();
+  const [isProcessingScan, setIsProcessingScan] = useState(false);
 
-  const [friends, setFriends] = useState([
-    {
-      id: 1,
-      name: "Eevee",
-      realId: "11111",
-      lastCatch: "Psyduck",
-      img: require("@/assets/icons/profilePic2.png"),
-    },
-    {
-      id: 2,
-      name: "Pikachu",
-      realId: "22222",
-      lastCatch: "Onix",
-      img: require("@/assets/icons/profilePic3.png"),
-    },
-    {
-      id: 3,
-      name: "Mudkop",
-      realId: "33333",
-      lastCatch: "Scyther",
-      img: require("@/assets/icons/profilePic4.png"),
-    },
-  ]);
+  const { friends } = useFriends();
 
-  const addFriend = (idValue: string) => {
+  const sendFriendRequest = (idValue: string) => {
     if (!idValue.trim()) return;
 
-    const newFriend = {
+    if (isProcessingScan) return;
+    setIsProcessingScan(true);
+
+    const newRequest = {
       id: Date.now(),
-      name: `Entrenador`,
+      name: "Entrenador",
       realId: idValue,
-      lastCatch: "N/A",
       img: require("@/assets/icons/profilePic.png"),
     };
 
-    setFriends([...friends, newFriend]);
+    addRequest(newRequest);
+
     setFriendId("");
     setShowAddBox(false);
     setShowScanner(false);
+    router.push("/solicitudes");
+
+    setTimeout(() => {
+      setIsProcessingScan(false);
+    }, 500);
   };
 
   return (
@@ -63,7 +55,10 @@ export default function Amigos() {
       <View className="flex-row items-center justify-between mb-5">
         <Text className="text-white text-2xl font-bold">Lista de Amigos</Text>
 
-        <TouchableOpacity className="bg-black border border-red-600 px-4 py-1 rounded-xl">
+        <TouchableOpacity
+          className="bg-black border border-red-600 px-4 py-2 rounded-xl"
+          onPress={() => router.push("/solicitudes")}
+        >
           <Text className="text-red-600 font-semibold">Solicitudes</Text>
         </TouchableOpacity>
       </View>
@@ -133,7 +128,7 @@ export default function Amigos() {
 
             {/* Botón Confirmar */}
             <TouchableOpacity
-              onPress={() => addFriend(friendId)}
+              onPress={() => sendFriendRequest(friendId)}
               className="bg-red-800 border border-red-600 w-96 py-3 rounded-xl mb-3"
             >
               <Text className="text-center text-white font-bold text-lg">
@@ -151,11 +146,11 @@ export default function Amigos() {
         </View>
       )}
 
-      {/* FULLSCREEN QR SCANNER */}
+      {/* QR SCANNER */}
       {showScanner && (
         <View className="absolute inset-0 bg-black/80 z-50">
           <ScanQR
-            onScanned={(value) => addFriend(value)}
+            onScanned={(value) => sendFriendRequest(value)}
             onClose={() => setShowScanner(false)}
           />
         </View>
