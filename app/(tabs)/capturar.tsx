@@ -108,9 +108,10 @@ export default function Capturar() {
     const shaker = startShake();
     shaker.start();
 
-    await playCaptureSound();
+    const captureSound = await playCaptureSound(); // 9s
 
-    await new Promise((res) => setTimeout(res, 3500));
+    // Shake 5s
+    await new Promise((res) => setTimeout(res, 5000));
     shaker.stop();
     shakeAnim.setValue(0);
 

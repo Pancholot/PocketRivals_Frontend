@@ -87,7 +87,6 @@ export default function Amigos() {
             </View>
           </View>
         ))}
-
         {/* Botón de Agregar */}
         <TouchableOpacity
           onPress={() => setShowAddBox(true)}
@@ -104,7 +103,7 @@ export default function Amigos() {
             {/* Botón de Escáner */}
             <TouchableOpacity
               onPress={() => setShowScanner(true)}
-              className="w-96 bg-red-800 border-2 border-red-600 rounded-3xl px-6 py-4 flex-row items-center justify-center mb-6"
+              className="w-80 bg-red-800 border-2 border-red-600 rounded-3xl px-6 py-4 flex-row items-center justify-center mb-6"
             >
               <Feather
                 name="camera"
@@ -119,7 +118,7 @@ export default function Amigos() {
 
             {/* Input para ID manual */}
             <TextInput
-              className="bg-white w-96 px-4 py-3 rounded-xl text-black mb-4"
+              className="bg-white w-80 px-4 py-3 rounded-xl text-black mb-4"
               placeholder="Ingresar ID"
               placeholderTextColor="#666"
               value={friendId}
@@ -129,7 +128,7 @@ export default function Amigos() {
             {/* Botón Confirmar */}
             <TouchableOpacity
               onPress={() => sendFriendRequest(friendId)}
-              className="bg-red-800 border border-red-600 w-96 py-3 rounded-xl mb-3"
+              className="bg-red-800 border border-red-600 w-80 py-3 rounded-xl mb-3"
             >
               <Text className="text-center text-white font-bold text-lg">
                 Agregar
