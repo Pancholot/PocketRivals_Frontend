@@ -319,7 +319,7 @@ export default function Capturar() {
 
               addPokemon({
                 id: Math.random().toString(36).substring(2, 12),
-                name: data.species.name,
+                name: PokemonName(data.species.name),
                 pokedex_number: capturedId,
                 type1: data.types[0].type.name,
                 type2: data.types[1]?.type.name || null,

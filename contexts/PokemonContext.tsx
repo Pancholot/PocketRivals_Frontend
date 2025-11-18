@@ -33,7 +33,7 @@ export function PokemonProvider({ children }: { children: ReactNode }) {
       id: "starter-1",
       in_team: 0,
       mote: null,
-      name: "Garchomp",
+      name: "Infernape",
       obtained_at: "Fri, 14 Nov 2025 00:00:00 GMT",
       player_id: "CV0FK1BJScNyvRIhf8QqxEzgd5zzI1RQ",
       pokedex_number: 392,
