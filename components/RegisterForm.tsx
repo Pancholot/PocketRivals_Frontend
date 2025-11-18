@@ -57,7 +57,7 @@ const RegisterForm = ({ setFormType }) => {
         resizeMode="contain"
       />
       <Text className="color-white text-xl font-bold text-center mb-2">
-        ¡Bienvenido a Pocket Rivals!
+        ¡Bienvenido a Pokémon Rivals!
       </Text>
       <TextInput
         className="border-2 border-white p-2 my-2  text-white w-full rounded-full"
@@ -97,11 +97,11 @@ const RegisterForm = ({ setFormType }) => {
             ? "Cargando recursos..."
             : isRegistering
               ? "Registrando..."
-              : "Registrar"}
+              : "Registrarse"}
         </Text>
       </GlobalButton>
       <View className="mt-4 flex items-center justify-center w-full">
-        <Text className=" text-slate-300">Ya tienes cuenta? </Text>
+        <Text className=" text-slate-300">¿Ya tienes cuenta? </Text>
 
         <GlobalButton
           className="bg-slate-300 w-full px-4 py-2 mt-4 rounded-full"

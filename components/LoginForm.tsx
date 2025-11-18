@@ -101,7 +101,7 @@ export default function LoginForm({ setFormType }) {
           onPress={() => setFormType("register")}
         >
           <Text className="text-center text-xl tracking-widest font-extrabold">
-            Registrar
+            Registrarse
           </Text>
         </GlobalButton>
       </View>
