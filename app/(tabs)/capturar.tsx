@@ -1,73 +1,110 @@
-import {
-  View,
-  Text,
-  ImageBackground,
-  TouchableOpacity,
-  Image,
-  Animated,
-  Platform,
-  Alert, // Importamos Alert para debugging
-} from "react-native";
+import { View, Text, ImageBackground, Image, Animated } from "react-native";
 import React, { useState, useRef, useEffect } from "react";
-import { Audio } from "expo-av";
-import { useMusic } from "@/components/MusicContext";
-import { Dimensions } from "react-native";
+import { Audio, Video, ResizeMode } from "expo-av";
+import { useMusic } from "contexts/MusicContext";
+import { Dimensions, Easing } from "react-native";
 
+import pokemonRivals from "@/assets/videos/pokemonRivals.mp4";
 import CaptureBg from "@/assets/backgrounds/capture.jpg";
 import CaptureButtonImage from "@/assets/icons/capture-button.png";
-import { numeroAleatorio } from "functions/helpers";
-import { pokemonSprite } from "functions/helpers";
+import { numeroAleatorio, pokemonSprite, pokemonName } from "functions/helpers";
+import { usePokemon } from "contexts/PokemonContext";
+import GlobalButton from "@/components/GlobalButton";
 
 export default function Capturar() {
   const { stopMusic, playMusic, isPlaying } = useMusic();
+
   const [musicWasPlaying, setMusicWasPlaying] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
-  const [pokemonImage, setPokemonImage] = useState(null);
   const [showPokemon, setShowPokemon] = useState(false);
 
-  const soundObject = useRef(null);
+  const [pokemonImage, setPokemonImage] = useState(null);
+  const [pokemonNameCaptured, setPokemonName] = useState("");
+  const [capturedId, setCapturedId] = useState<number | null>(null);
 
+  // Animaciones
   const shakeAnim = useRef(new Animated.Value(0)).current;
   const pokeballOpacity = useRef(new Animated.Value(1)).current;
-  const pokemonScale = useRef(new Animated.Value(0)).current;
-  const flashOpacity = useRef(new Animated.Value(0)).current;
-  const { width } = Dimensions.get("window");
+  const pokeballReadyAnim = useRef(new Animated.Value(0)).current;
 
-  // --- Setup de Audio igual que antes ---
+  const pokemonScale = useRef(new Animated.Value(0)).current;
+  const pokemonBounce = useRef(new Animated.Value(0)).current;
+
+  const flashOpacity = useRef(new Animated.Value(0)).current;
+
+  const soundObject = useRef(null);
+  const { width } = Dimensions.get("window");
+  const { addPokemon } = usePokemon();
+
+  // AUDIO MODE
   useEffect(() => {
-    const initAudio = async () => {
-      try {
-        await Audio.setAudioModeAsync({
-          playsInSilentModeIOS: true,
-          allowsRecordingIOS: false,
-          playThroughEarpieceAndroid: false,
-          shouldDuckAndroid: true,
-        });
-      } catch (error) {
-        console.warn("Audio error", error);
-      }
-    };
-    initAudio();
+    Audio.setAudioModeAsync({
+      playsInSilentModeIOS: true,
+      shouldDuckAndroid: true,
+    });
+
     return () => {
       if (soundObject.current) soundObject.current.unloadAsync();
     };
   }, []);
 
+  // SONIDO DE CAPTURA
   const playCaptureSound = async () => {
     try {
-      if (soundObject.current) await soundObject.current.unloadAsync();
+      if (soundObject.current) {
+        await soundObject.current.stopAsync();
+        await soundObject.current.unloadAsync();
+      }
+
       const { sound } = await Audio.Sound.createAsync(
         require("@/assets/sounds/captureSound.mp3")
       );
+
       soundObject.current = sound;
       await sound.playAsync();
-    } catch (error) {
-      console.log("Error sonido", error);
+    } catch (err) {
+      console.log("Error sonido:", err);
     }
   };
 
+  // ANIMACIÓN DE “POKEBALL LISTA"
+  const startReadyAnimation = () => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pokeballReadyAnim, {
+          toValue: 1,
+          duration: 800,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.timing(pokeballReadyAnim, {
+          toValue: 0,
+          duration: 800,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  };
+
+  useEffect(() => {
+    if (!isAnimating && !showPokemon) startReadyAnimation();
+  }, [isAnimating, showPokemon]);
+
+  const pokeballReadyStyle = {
+    transform: [
+      {
+        rotate: pokeballReadyAnim.interpolate({
+          inputRange: [0, 1],
+          outputRange: ["-5deg", "5deg"],
+        }),
+      },
+    ],
+  };
+
+  // ANIMACIÓN DE SHAKE (capturando)
   const startShake = () => {
-    const animation = Animated.loop(
+    return Animated.loop(
       Animated.sequence([
         Animated.timing(shakeAnim, {
           toValue: 1,
@@ -86,11 +123,30 @@ export default function Capturar() {
         }),
       ])
     );
-    return animation;
   };
 
+  // ANIMACIÓN DE BOUNCE DEL POKÉMON
+  const startPokemonBounce = () => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pokemonBounce, {
+          toValue: -18,
+          duration: 350,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.timing(pokemonBounce, {
+          toValue: 0,
+          duration: 350,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  };
+
+  // CAPTURAR
   const handleCapture = async () => {
-    console.log("BOTÓN PRESIONADO"); // Debug log
     if (isAnimating) return;
 
     setIsAnimating(true);
@@ -98,29 +154,26 @@ export default function Capturar() {
     stopMusic();
 
     const id = numeroAleatorio();
-    // Fix HTTPS
-    let pokeUri = pokemonSprite(id);
-    if (pokeUri && pokeUri.startsWith("http://")) {
-      pokeUri = pokeUri.replace("http://", "https://");
-    }
-    setPokemonImage({ uri: pokeUri });
+    setCapturedId(id);
+    setPokemonName(pokemonName(id));
+    setPokemonImage({ uri: pokemonSprite(id) });
 
-    const shaker = startShake();
-    shaker.start();
+    const shake = startShake();
+    shake.start();
 
-    const captureSound = await playCaptureSound(); // 9s
+    playCaptureSound();
 
-    // Shake 5s
     await new Promise((res) => setTimeout(res, 5000));
-    shaker.stop();
+
+    shake.stop();
     shakeAnim.setValue(0);
 
+    // Ocultar pokeball + flash + mostrar Pokémon
     Animated.timing(pokeballOpacity, {
       toValue: 0,
       duration: 400,
       useNativeDriver: true,
     }).start(() => {
-      // Animamos el flash
       Animated.sequence([
         Animated.timing(flashOpacity, {
           toValue: 1,
@@ -135,6 +188,8 @@ export default function Capturar() {
       ]).start();
 
       setShowPokemon(true);
+      startPokemonBounce();
+
       Animated.spring(pokemonScale, {
         toValue: 1,
         friction: 6,
@@ -143,17 +198,20 @@ export default function Capturar() {
       }).start();
     });
 
-    await new Promise((res) => setTimeout(res, 2000));
+    await new Promise((res) => setTimeout(res, 9000));
+
     if (soundObject.current) {
       try {
         await soundObject.current.stopAsync();
         await soundObject.current.unloadAsync();
-      } catch (e) {}
+      } catch {}
       soundObject.current = null;
     }
+
     setIsAnimating(false);
   };
 
+  // REINICIO
   const resetCapture = () => {
     setShowPokemon(false);
     pokeballOpacity.setValue(1);
@@ -161,6 +219,7 @@ export default function Capturar() {
     if (musicWasPlaying) playMusic();
   };
 
+  // SHAKE DE LA POKEBALL DURANTE LA CAPTURA
   const shakeStyle = {
     transform: [
       {
@@ -180,85 +239,132 @@ export default function Capturar() {
   };
 
   return (
-    <ImageBackground
-      source={CaptureBg}
-      className="h-full flex flex-col items-center justify-center"
-    >
-      {/* SOLUCIÓN: 
-          El Flash SOLO se renderiza si isAnimating es true.
-          Antes estaba siempre renderizado tapando el botón.
-      */}
+    <View className="h-full w-full">
+      <Video
+        source={require("@/assets/videos/pokemonRivals.mp4")}
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+        }}
+        resizeMode={ResizeMode.COVER}
+        isLooping
+        shouldPlay
+        isMuted
+      />
+      {/* FLASH */}
       {isAnimating && (
         <Animated.View
           pointerEvents="none"
           style={{
             position: "absolute",
-            backgroundColor: "white",
             top: 0,
             left: 0,
             right: 0,
             bottom: 0,
+            backgroundColor: "white",
             opacity: flashOpacity,
-            zIndex: 50, // Muy alto para tapar todo CUANDO APAREZCA
-            elevation: 50, // Fix Android elevation
+            zIndex: 50,
           }}
         />
       )}
 
+      {/* POKEBALL */}
       {!showPokemon && (
-        <TouchableOpacity
-          className="w-72 h-72"
-          onPress={handleCapture}
-          disabled={isAnimating}
-          activeOpacity={0.8}
-          // Aseguramos que el botón tenga zIndex para estar sobre el fondo
-          style={{ zIndex: 20, elevation: 20 }}
-        >
-          <Animated.Image
-            source={CaptureButtonImage}
-            className="w-full h-full"
-            style={shakeStyle}
-            resizeMode="contain" // Asegura que la imagen esté dentro del touchable
-          />
-        </TouchableOpacity>
-      )}
-
-      {showPokemon && (
         <View
-          className="absolute top-0 left-0 right-0 bottom-0 flex items-center justify-center"
-          style={{ zIndex: 30, elevation: 30 }} // Capa superior al final
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 20,
+          }}
         >
-          <Animated.View
-            style={{
-              transform: [{ scale: pokemonScale }],
-              opacity: pokemonScale,
-              alignItems: "center",
-            }}
+          <GlobalButton
+            className="w-60 h-60"
+            onPress={handleCapture}
+            disabled={isAnimating}
           >
-            <Image
-              source={pokemonImage}
-              style={{
-                width: width * 0.6,
-                height: width * 0.6,
-                resizeMode: "contain",
-              }}
+            <Animated.Image
+              source={CaptureButtonImage}
+              resizeMode="contain"
+              style={[
+                {
+                  width: "100%",
+                  height: "100%",
+                },
+                shakeStyle,
+                !isAnimating ? pokeballReadyStyle : {},
+              ]}
             />
-
-            <TouchableOpacity
-              className="mt-8 bg-white px-8 py-4 rounded-2xl shadow-lg"
-              onPress={resetCapture}
-              style={{ elevation: 5 }}
-            >
-              <Text className="text-black font-bold text-xl text-center">
-                ¡Atrapado!{"\n"}
-                <Text className="text-sm font-normal text-gray-500">
-                  Agregar a mi colección
-                </Text>
-              </Text>
-            </TouchableOpacity>
-          </Animated.View>
+          </GlobalButton>
         </View>
       )}
-    </ImageBackground>
+
+      {/* POKEMON */}
+      {showPokemon && (
+        <View className="absolute top-0 left-0 right-0 bottom-0 items-center justify-center">
+          <Animated.Image
+            source={pokemonImage}
+            style={{
+              width: width * 0.6,
+              height: width * 0.6,
+              resizeMode: "contain",
+              transform: [
+                { scale: pokemonScale },
+                { translateY: pokemonBounce },
+              ],
+            }}
+          />
+
+          <GlobalButton
+            className="bg-red-800 border-2 px-8 py-4 rounded-2xl mt-6"
+            onPress={async () => {
+              if (!capturedId) return;
+
+              // detener audio
+              if (soundObject.current) {
+                try {
+                  await soundObject.current.stopAsync();
+                  await soundObject.current.unloadAsync();
+                } catch {}
+              }
+
+              // API POKÉMON
+              const res = await fetch(
+                `https://pokeapi.co/api/v2/pokemon/${capturedId}`
+              );
+              const data = await res.json();
+
+              addPokemon({
+                id: Math.random().toString(36).substring(2, 12),
+                name: data.species.name,
+                pokedex_number: capturedId,
+                type1: data.types[0].type.name,
+                type2: data.types[1]?.type.name || null,
+                mote: null,
+                in_team: 0,
+                obtained_at: new Date().toUTCString(),
+                player_id: "yourPlayerId",
+              });
+
+              resetCapture();
+            }}
+          >
+            <Text className="text-white font-bold text-xl text-center">
+              ¡Has atrapado a {pokemonNameCaptured}!{"\n"}
+              <Text className="text-sm text-white">
+                Agregalo a tu colección
+              </Text>
+            </Text>
+          </GlobalButton>
+        </View>
+      )}
+    </View>
   );
 }

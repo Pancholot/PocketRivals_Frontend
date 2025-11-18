@@ -1,7 +1,8 @@
-import { View, Text, TouchableOpacity, ScrollView, Image } from "react-native";
+import { View, Text, ScrollView, Image } from "react-native";
 import { useRouter } from "expo-router";
 import { useFriendRequests } from "hooks/useFriendRequests";
 import { useFriends } from "hooks/useFriends";
+import GlobalButton from "@/components/GlobalButton";
 
 export default function Solicitudes() {
   const router = useRouter();
@@ -13,12 +14,12 @@ export default function Solicitudes() {
       <View className="flex-row items-center justify-between mb-5">
         <Text className="text-white text-2xl font-bold">Solicitudes</Text>
 
-        <TouchableOpacity
+        <GlobalButton
           onPress={() => router.back()}
           className="bg-black border border-red-600 px-4 py-2 rounded-xl"
         >
           <Text className="text-red-600 font-semibold">Volver</Text>
-        </TouchableOpacity>
+        </GlobalButton>
       </View>
 
       <ScrollView>
@@ -44,7 +45,7 @@ export default function Solicitudes() {
               </Text>
 
               <View className="flex-row gap-4 mt-3">
-                <TouchableOpacity
+                <GlobalButton
                   onPress={() => {
                     addFriend({
                       id: Date.now(),
@@ -58,14 +59,14 @@ export default function Solicitudes() {
                   className="bg-red-700 px-4 py-2 rounded-xl border-2 border-white"
                 >
                   <Text className="text-white font-semibold">Aceptar</Text>
-                </TouchableOpacity>
+                </GlobalButton>
 
-                <TouchableOpacity
+                <GlobalButton
                   onPress={() => removeRequest(r.id)}
                   className="bg-white px-4 py-2 rounded-xl border-2 border-red-600"
                 >
                   <Text className="text-black font-semibold">Rechazar</Text>
-                </TouchableOpacity>
+                </GlobalButton>
               </View>
             </View>
           </View>

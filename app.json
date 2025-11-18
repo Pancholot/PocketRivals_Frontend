@@ -1,13 +1,13 @@
 {
   "expo": {
-    "name": "PocketRivals",
-    "slug": "PocketRivals",
+    "name": "Pokemon Rivals",
+    "slug": "pokemon-rivals",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
-    "scheme": "pocketrivals",
+    "scheme": "pokemon-rivals",
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",

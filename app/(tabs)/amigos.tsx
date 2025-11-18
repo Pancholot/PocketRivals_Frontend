@@ -1,11 +1,4 @@
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Image,
-  ScrollView,
-  TextInput,
-} from "react-native";
+import { View, Text, Image, ScrollView, TextInput } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useState } from "react";
 import ScanQR from "@/components/scanQR";
@@ -13,6 +6,7 @@ import IntroAnimeAd from "@/components/IntroAnimeAd";
 import { useRouter } from "expo-router";
 import { useFriendRequests } from "hooks/useFriendRequests";
 import { useFriends } from "hooks/useFriends";
+import GlobalButton from "@/components/GlobalButton";
 
 export default function Amigos() {
   const [showAddBox, setShowAddBox] = useState(false);
@@ -55,12 +49,12 @@ export default function Amigos() {
       <View className="flex-row items-center justify-between mb-5">
         <Text className="text-white text-2xl font-bold">Lista de Amigos</Text>
 
-        <TouchableOpacity
+        <GlobalButton
           className="bg-black border border-red-600 px-4 py-2 rounded-xl"
           onPress={() => router.push("/solicitudes")}
         >
           <Text className="text-red-600 font-semibold">Solicitudes</Text>
-        </TouchableOpacity>
+        </GlobalButton>
       </View>
 
       {/* FRIEND LIST */}
@@ -87,21 +81,24 @@ export default function Amigos() {
             </View>
           </View>
         ))}
-        {/* Botón de Agregar */}
-        <TouchableOpacity
+      </ScrollView>
+
+      {/* BOTÓN AGREGAR AMIGO */}
+      <View className="absolute bottom-6 left-5 right-5">
+        <GlobalButton
           onPress={() => setShowAddBox(true)}
-          className="bg-black border-2 border-red-600 rounded-2xl py-4 items-center mt-2 mb-10"
+          className="bg-black border-2 border-red-600 rounded-2xl py-4 items-center"
         >
           <Text className="text-red-600 font-bold text-lg">Agregar Amigo</Text>
-        </TouchableOpacity>
-      </ScrollView>
+        </GlobalButton>
+      </View>
 
       {/* Modal de Agregar Amigo */}
       {showAddBox && (
         <View className="absolute inset-0 bg-black/70 justify-center items-center px-8 z-50">
           <View className="bg-black py-10 px-8 rounded-3xl border-2 border-red-600 w-full items-center">
             {/* Botón de Escáner */}
-            <TouchableOpacity
+            <GlobalButton
               onPress={() => setShowScanner(true)}
               className="w-80 bg-red-800 border-2 border-red-600 rounded-3xl px-6 py-4 flex-row items-center justify-center mb-6"
             >
@@ -112,7 +109,7 @@ export default function Amigos() {
                 style={{ marginRight: 8 }}
               />
               <Text className="text-white font-bold text-lg">Escanear QR</Text>
-            </TouchableOpacity>
+            </GlobalButton>
 
             <Text className="text-white font-bold text-lg mb-4">o</Text>
 
@@ -126,21 +123,21 @@ export default function Amigos() {
             />
 
             {/* Botón Confirmar */}
-            <TouchableOpacity
+            <GlobalButton
               onPress={() => sendFriendRequest(friendId)}
               className="bg-red-800 border border-red-600 w-80 py-3 rounded-xl mb-3"
             >
               <Text className="text-center text-white font-bold text-lg">
                 Agregar
               </Text>
-            </TouchableOpacity>
+            </GlobalButton>
 
             {/* Cerrar */}
-            <TouchableOpacity onPress={() => setShowAddBox(false)}>
+            <GlobalButton onPress={() => setShowAddBox(false)}>
               <Text className="text-red-600 font-bold text-lg mt-2">
                 Cerrar
               </Text>
-            </TouchableOpacity>
+            </GlobalButton>
           </View>
         </View>
       )}

@@ -8,6 +8,8 @@ import {
 import React from "react";
 import { pokemonSprite } from "functions/helpers";
 import { POKEMON_TYPE_BACKGROUNDS } from "functions/UI.utils";
+import { useRouter } from "expo-router";
+import GlobalButton from "./GlobalButton";
 
 const PokemonCard = ({ pokemon }) => {
   const theme = POKEMON_TYPE_BACKGROUNDS[pokemon.type1];
@@ -35,11 +37,15 @@ const PokemonCard = ({ pokemon }) => {
     fairy: "bg-[#ee99ac]",
   };
 
+  const router = useRouter();
   return (
-    <TouchableOpacity
+    <GlobalButton
       className={`
     flex-col mx-4 my-2 rounded-lg h-64 shadow-md ${theme} overflow-hidden
   `}
+      onPress={() => {
+        router.replace(`stats/${pokemon.pokedex_number}`);
+      }}
     >
       <View className="flex-1 justify-center items-center p-4">
         <Image
@@ -58,7 +64,7 @@ const PokemonCard = ({ pokemon }) => {
           {pokemon.mote || pokemon.name}
         </Text>
       </View>
-    </TouchableOpacity>
+    </GlobalButton>
   );
 };
 

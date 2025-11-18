@@ -1,6 +1,8 @@
 import { useState, useRef } from "react";
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text } from "react-native";
 import { CameraView, useCameraPermissions } from "expo-camera";
+import GlobalButton from "./GlobalButton";
+import { G } from "react-native-svg";
 
 export default function ScanQR({ onScanned, onClose }) {
   const [permission, requestPermission] = useCameraPermissions();
@@ -30,23 +32,23 @@ export default function ScanQR({ onScanned, onClose }) {
             Para escanear un código QR, necesitamos acceso a tu cámara.
           </Text>
 
-          <TouchableOpacity
+          <GlobalButton
             onPress={requestPermission}
             className="bg-blue-600 w-full py-3 rounded-xl mb-3"
           >
             <Text className="text-center text-white font-bold text-lg">
               Conceder Permiso
             </Text>
-          </TouchableOpacity>
+          </GlobalButton>
 
-          <TouchableOpacity
+          <GlobalButton
             onPress={onClose}
             className="bg-gray-300 w-full py-3 rounded-xl"
           >
             <Text className="text-center text-black font-semibold text-lg">
               Cerrar
             </Text>
-          </TouchableOpacity>
+          </GlobalButton>
         </View>
       </View>
     );

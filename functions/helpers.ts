@@ -1,3 +1,6 @@
+import pokemonData from "@/assets/data/pokemonName.json";
+
+export const pokemonName = (id: number) => pokemonData[id];
 export function numeroAleatorio() {
   return Math.floor(Math.random() * 150) + 1;
 }
@@ -43,7 +46,7 @@ export const selectRandomTop = (number: number) => {
   return topValues[number % topValues.length];
 };
 
-export const pokemonSprite = (id: number) => {
+export const pokemonSprite = (id: number | string) => {
   return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${
     id
   }.png`;

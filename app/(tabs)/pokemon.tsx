@@ -1,29 +1,22 @@
-import {
-  View,
-  Text,
-  Image,
-  TouchableOpacity,
-  ScrollView,
-  FlatList,
-} from "react-native";
+import { View, Text, FlatList } from "react-native";
 import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { YOUR_POKEMON_DATA } from "../../functions/UI.utils";
+import { usePokemon } from "contexts/PokemonContext";
 import PokemonCard from "@/components/PokemonCard";
-import IntroAnimeAd from "@/components/IntroAnimeAd";
 
-//bg-red-800
-//bg-red-600
-//bg-black
-const pokemon = () => {
+const PokemonParty = () => {
+  const { myPokemon } = usePokemon();
+
   return (
-    <SafeAreaView className="flex items-center bg-red-800">
+    <SafeAreaView className="flex items-center bg-red-800 h-full w-full">
       <Text className="text-2xl font-extrabold mt-2 text-white">
-        Pokemon Capturados
+        Pokémon Capturados
       </Text>
+
       <FlatList
         numColumns={1}
-        data={YOUR_POKEMON_DATA}
+        data={myPokemon}
+        keyExtractor={(item) => item.id}
         className="h-full w-full"
         renderItem={({ item }) => <PokemonCard pokemon={item} />}
       />
@@ -31,4 +24,4 @@ const pokemon = () => {
   );
 };
 
-export default pokemon;
+export default PokemonParty;

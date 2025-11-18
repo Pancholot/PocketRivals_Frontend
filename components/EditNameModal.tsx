@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { View, Text, TouchableOpacity, TextInput } from "react-native";
+import GlobalButton from "./GlobalButton";
 
 interface EditNameModalProps {
   visible: boolean;
@@ -35,14 +36,14 @@ export default function EditNameModal({
 
         {/* Botones */}
         <View className="flex-row justify-between mt-2">
-          <TouchableOpacity
+          <GlobalButton
             onPress={onClose}
             className="bg-gray-300 px-4 py-2 rounded-xl"
           >
             <Text className="text-black font-bold">Cancelar</Text>
-          </TouchableOpacity>
+          </GlobalButton>
 
-          <TouchableOpacity
+          <GlobalButton
             onPress={() => {
               const clean = name.trim();
               if (clean.length > 0) onSave(clean);
@@ -51,7 +52,7 @@ export default function EditNameModal({
             className="bg-red-700 px-4 py-2 rounded-xl"
           >
             <Text className="text-white font-bold">Guardar</Text>
-          </TouchableOpacity>
+          </GlobalButton>
         </View>
       </View>
     </View>
