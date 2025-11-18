@@ -2,7 +2,6 @@ import { View, Text, Image, ScrollView, TextInput } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useState } from "react";
 import ScanQR from "@/components/scanQR";
-import IntroAnimeAd from "@/components/IntroAnimeAd";
 import { useRouter } from "expo-router";
 import { useFriendRequests } from "hooks/useFriendRequests";
 import { useFriends } from "hooks/useFriends";
@@ -151,7 +150,6 @@ export default function Amigos() {
           />
         </View>
       )}
-      <IntroAnimeAd />
     </View>
   );
 }

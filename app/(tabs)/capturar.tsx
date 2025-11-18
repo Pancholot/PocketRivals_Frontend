@@ -5,9 +5,8 @@ import { useMusic } from "contexts/MusicContext";
 import { Dimensions, Easing } from "react-native";
 
 import pokemonRivals from "@/assets/videos/pokemonRivals.mp4";
-import CaptureBg from "@/assets/backgrounds/capture.jpg";
 import CaptureButtonImage from "@/assets/icons/capture-button.png";
-import { numeroAleatorio, pokemonSprite, pokemonName } from "functions/helpers";
+import { numeroAleatorio, pokemonSprite, PokemonName } from "functions/helpers";
 import { usePokemon } from "contexts/PokemonContext";
 import GlobalButton from "@/components/GlobalButton";
 
@@ -18,8 +17,8 @@ export default function Capturar() {
   const [isAnimating, setIsAnimating] = useState(false);
   const [showPokemon, setShowPokemon] = useState(false);
 
-  const [pokemonImage, setPokemonImage] = useState(null);
   const [pokemonNameCaptured, setPokemonName] = useState("");
+  const [pokemonImage, setPokemonImage] = useState(null);
   const [capturedId, setCapturedId] = useState<number | null>(null);
 
   // Animaciones
@@ -155,7 +154,9 @@ export default function Capturar() {
 
     const id = numeroAleatorio();
     setCapturedId(id);
-    setPokemonName(pokemonName(id));
+    const resName = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
+    const dataName = await resName.json();
+    setPokemonName(PokemonName(dataName.species.name));
     setPokemonImage({ uri: pokemonSprite(id) });
 
     const shake = startShake();

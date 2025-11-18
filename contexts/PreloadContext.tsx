@@ -10,7 +10,6 @@ export const PreloadProvider = ({ children }) => {
     const loadAssets = async () => {
       const images = [
         require("@/assets/backgrounds/auth.png"),
-        require("@/assets/backgrounds/capture.jpg"),
         require("@/assets/icons/Logo.png"),
         require("@/assets/icons/pokeball.png"),
         require("@/assets/icons/amigos.png"),

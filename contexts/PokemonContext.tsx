@@ -30,24 +30,26 @@ export function PokemonProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [myPokemon, setMyPokemon] = useState<Pokemon[]>([
     {
-      id: "9FnULSmiWxiOFOFOZTTxrisL",
+      id: "starter-1",
       in_team: 0,
       mote: null,
-      name: "Venusaur",
+      name: "Garchomp",
       obtained_at: "Fri, 14 Nov 2025 00:00:00 GMT",
       player_id: "CV0FK1BJScNyvRIhf8QqxEzgd5zzI1RQ",
-      pokedex_number: 3,
-      type1: "grass",
+      pokedex_number: 392,
+      type1: "fire",
+      type2: "fighting",
     },
     {
-      id: "NMwC1oDu8RDi8x3glmYpnVh0",
+      id: "starter-2",
       in_team: 0,
       mote: null,
-      name: "Mewtwo",
+      name: "Garchomp",
       obtained_at: "Fri, 14 Nov 2025 00:00:00 GMT",
       player_id: "CV0FK1BJScNyvRIhf8QqxEzgd5zzI1RQ",
-      pokedex_number: 150,
-      type1: "psychic",
+      pokedex_number: 445,
+      type1: "dragon",
+      type2: "ground",
     },
   ]);
 
