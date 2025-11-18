@@ -258,33 +258,14 @@ export default function Capturar() {
       {isAnimating && (
         <Animated.View
           pointerEvents="none"
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: "white",
-            opacity: flashOpacity,
-            zIndex: 50,
-          }}
+          style={{ opacity: flashOpacity }}
+          className="absolute inset-0 bg-white z-50"
         />
       )}
 
       {/* POKEBALL */}
       {!showPokemon && (
-        <View
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            justifyContent: "center",
-            alignItems: "center",
-            zIndex: 20,
-          }}
-        >
+        <View className="absolute inset-0 justify-center items-center z-20">
           <GlobalButton
             className="w-60 h-60"
             onPress={handleCapture}
@@ -293,14 +274,8 @@ export default function Capturar() {
             <Animated.Image
               source={CaptureButtonImage}
               resizeMode="contain"
-              style={[
-                {
-                  width: "100%",
-                  height: "100%",
-                },
-                shakeStyle,
-                !isAnimating ? pokeballReadyStyle : {},
-              ]}
+              className="w-full h-full"
+              style={[shakeStyle, !isAnimating ? pokeballReadyStyle : {}]}
             />
           </GlobalButton>
         </View>
@@ -308,7 +283,7 @@ export default function Capturar() {
 
       {/* POKEMON */}
       {showPokemon && (
-        <View className="absolute top-0 left-0 right-0 bottom-0 items-center justify-center">
+        <View className="absolute top-0 left-0 right-0 bottom-0 items-center justify-center pb-24">
           <Animated.Image
             source={pokemonImage}
             style={{
@@ -323,7 +298,7 @@ export default function Capturar() {
           />
 
           <GlobalButton
-            className="bg-red-800 border-2 px-8 py-4 rounded-2xl mt-6"
+            className="bg-red-800 border-2 px-8 py-4 rounded-2xl"
             onPress={async () => {
               if (!capturedId) return;
 
