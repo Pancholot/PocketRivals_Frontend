@@ -6,15 +6,19 @@ import {
   TouchableOpacity,
   TextInputChangeEvent,
   Keyboard,
+  Alert,
 } from "react-native";
 import React, { Dispatch, SetStateAction, useState } from "react";
 import { useMusic } from "contexts/MusicContext";
 import { useRouter } from "expo-router";
 import GlobalButton from "./GlobalButton";
 import { usePreload } from "contexts/PreloadContext";
+import { logIn } from "api/apiService";
+import PasswordInput from "./PasswordInput";
 
 export default function LoginForm({ setFormType }) {
   const [email, setEmail] = useState<string>("");
+  const [emailError, setEmailError] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const { playMusic } = useMusic();
   const [isLoggingIn, setIsLoggingIn] = useState(false);
@@ -28,25 +32,54 @@ export default function LoginForm({ setFormType }) {
     func(e.nativeEvent.text);
   };
 
+  const validateEmail = (value: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(value)) {
+      setEmailError("Ingresa un correo válido.");
+    } else {
+      setEmailError("");
+    }
+  };
+
   const handleOnPressLogIn = async () => {
     if (isLoggingIn) return;
+
+    if (!email.trim() || !password.trim()) {
+      return Alert.alert(
+        "Campos incompletos",
+        "Ingresa tu email y contraseña."
+      );
+    }
+
     setIsLoggingIn(true);
     Keyboard.dismiss();
     await playMusic();
-    /*try {
+
+    try {
       console.log("Logging in with", { email, password });
       const message = await logIn({ email, password });
-      if (message == "Bienvenido") {
-        Alert.alert("Bienvenido");*/
-    router.replace("/capturar");
-    /*}
+
+      if (message === "Bienvenido") {
+        router.replace("/capturar");
+      } else {
+        Alert.alert("Inicio de sesión fallido", message);
+      }
+
       setEmail("");
       setPassword("");
     } catch (e) {
-      Alert.alert("Error al iniciar sesión", e.message);
+      const backendMessage =
+        e?.response?.data?.message ||
+        e?.response?.data ||
+        e?.message ||
+        "No se pudo conectar al servidor.";
+
+      Alert.alert("Error al iniciar sesión", backendMessage);
       console.error("Login failed:", e);
-    }*/
-    setIsLoggingIn(false);
+    } finally {
+      setIsLoggingIn(false);
+    }
   };
 
   return (
@@ -60,20 +93,31 @@ export default function LoginForm({ setFormType }) {
         ¡Bienvenido de nuevo, Entrenador!
       </Text>
       <TextInput
-        className="border-2 border-white p-2 my-2 text-white w-full rounded-full"
         value={email}
-        onChange={(e) => handleOnChangeTextInput(e, setEmail)}
+        onChangeText={(text) => {
+          setEmail(text);
+          validateEmail(text);
+        }}
         placeholder="Email"
-        placeholderTextColor={"white"}
-      ></TextInput>
-      <TextInput
-        className="border-2 border-white  p-2 my-2 w-full text-white rounded-full"
-        value={password}
-        onChange={(e) => handleOnChangeTextInput(e, setPassword)}
-        placeholder="Password"
-        secureTextEntry
-        placeholderTextColor={"white"}
-      ></TextInput>
+        placeholderTextColor="white"
+        style={{
+          borderWidth: 2,
+          borderColor: emailError ? "red" : "white",
+          paddingVertical: 10,
+          paddingHorizontal: 16,
+          borderRadius: 999,
+          color: "white",
+          width: "100%",
+          marginVertical: 8,
+          fontSize: 16,
+        }}
+      />
+      {emailError !== "" && (
+        <Text style={{ color: "red", alignSelf: "center", marginTop: -5 }}>
+          {emailError}
+        </Text>
+      )}
+      <PasswordInput password={password} setPassword={setPassword} />
       <GlobalButton
         disabled={!ready || isLoggingIn}
         className={`w-full px-4 py-2 mt-4 rounded-full ${

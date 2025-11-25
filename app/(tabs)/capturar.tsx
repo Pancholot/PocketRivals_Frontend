@@ -35,6 +35,10 @@ export default function Capturar() {
   const { width } = Dimensions.get("window");
   const { addPokemon } = usePokemon();
 
+  const [isCooldown, setIsCooldown] = useState(false);
+  const COOLDOWN_TIME = 3000;
+  const cooldownOpacity = useRef(new Animated.Value(1)).current;
+
   // AUDIO MODE
   useEffect(() => {
     Audio.setAudioModeAsync({
@@ -85,6 +89,21 @@ export default function Capturar() {
       ])
     ).start();
   };
+
+  const startCooldownAnimation = () => {
+    cooldownOpacity.setValue(0.3);
+    Animated.timing(cooldownOpacity, {
+      toValue: 0.6,
+      duration: COOLDOWN_TIME,
+      useNativeDriver: true,
+    }).start(() => cooldownOpacity.setValue(1));
+  };
+
+  const pokeballCooldownStyle = {
+    opacity: cooldownOpacity,
+  };
+
+  const combinedOpacity = Animated.multiply(pokeballOpacity, cooldownOpacity);
 
   useEffect(() => {
     if (!isAnimating && !showPokemon) startReadyAnimation();
@@ -210,12 +229,19 @@ export default function Capturar() {
     }
 
     setIsAnimating(false);
+    setIsCooldown(true);
+    startCooldownAnimation();
+
+    setTimeout(() => {
+      setIsCooldown(false);
+    }, COOLDOWN_TIME);
   };
 
   // REINICIO
   const resetCapture = () => {
     setShowPokemon(false);
     pokeballOpacity.setValue(1);
+    cooldownOpacity.setValue(1);
     pokemonScale.setValue(0);
     if (musicWasPlaying) playMusic();
   };
@@ -236,7 +262,7 @@ export default function Capturar() {
         }),
       },
     ],
-    opacity: pokeballOpacity,
+    opacity: combinedOpacity,
   };
 
   return (
@@ -276,7 +302,11 @@ export default function Capturar() {
               source={CaptureButtonImage}
               resizeMode="contain"
               className="w-full h-full"
-              style={[shakeStyle, !isAnimating ? pokeballReadyStyle : {}]}
+              style={[
+                shakeStyle,
+                !isAnimating ? pokeballReadyStyle : {},
+                isCooldown ? pokeballCooldownStyle : {},
+              ]}
             />
           </GlobalButton>
         </View>
@@ -322,7 +352,6 @@ export default function Capturar() {
                 name: PokemonName(data.species.name),
                 pokedex_number: capturedId,
                 type1: data.types[0].type.name,
-                type2: data.types[1]?.type.name || null,
                 mote: null,
                 in_team: 0,
                 obtained_at: new Date().toUTCString(),

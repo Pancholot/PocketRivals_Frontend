@@ -9,6 +9,7 @@ import { useRouter } from "expo-router";
 import EditNameModal from "@/components/EditNameModal";
 import { SafeAreaView } from "react-native-safe-area-context";
 import GlobalButton from "@/components/GlobalButton";
+import { logout } from "api/apiService";
 
 const ajustes = () => {
   const userId = "12345";
@@ -41,8 +42,13 @@ const ajustes = () => {
           <GlobalButton
             className="border bg-black border-red-600 px-4 py-2 rounded-xl"
             onPress={() => {
-              stopMusic();
-              router.replace("/");
+              try {
+                logout();
+                stopMusic();
+                router.replace("/");
+              } catch (error) {
+                Alert.alert("Error", "Error al cerrar sesión");
+              }
             }}
           >
             <Text className="text-red-600 font-semibold">Cerrar Sesión</Text>
