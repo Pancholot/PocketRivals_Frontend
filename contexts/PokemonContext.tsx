@@ -2,10 +2,10 @@ import { useRouter } from "expo-router";
 import { createContext, useContext, useState, ReactNode } from "react";
 
 export type Pokemon = {
-  id: string; // ID único del registro
-  name: string; // nombre del Pokémon
-  pokedex_number: number; // número de Pokédex
-  type1: string | null; // tipo principal
+  id: string;
+  name: string;
+  pokedex_number: number;
+  type1: string | null;
   in_team: number;
   obtained_at: string;
   mote: string | null;
@@ -14,6 +14,7 @@ export type Pokemon = {
 
 type PokemonContextType = {
   myPokemon: Pokemon[];
+  setMyPokemon: React.Dispatch<React.SetStateAction<Pokemon[]>>;
   addPokemon: (pokemon: Pokemon) => void;
   deletePokemon: (pokemonName: string) => void;
   changeMote: (pokedexNumber: number, newMote: string) => void;
@@ -21,6 +22,7 @@ type PokemonContextType = {
 
 const PokemonContext = createContext<PokemonContextType>({
   myPokemon: [],
+  setMyPokemon: () => {},
   addPokemon: () => {},
   deletePokemon: () => {},
   changeMote: () => {},
@@ -28,30 +30,7 @@ const PokemonContext = createContext<PokemonContextType>({
 
 export function PokemonProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
-  const [myPokemon, setMyPokemon] = useState<Pokemon[]>([
-    {
-      id: "starter-1",
-      in_team: 0,
-      mote: null,
-      name: "Infernape",
-      obtained_at: "Fri, 14 Nov 2025 00:00:00 GMT",
-      player_id: "CV0FK1BJScNyvRIhf8QqxEzgd5zzI1RQ",
-      pokedex_number: 392,
-      type1: "fire",
-      type2: "fighting",
-    },
-    {
-      id: "starter-2",
-      in_team: 0,
-      mote: null,
-      name: "Garchomp",
-      obtained_at: "Fri, 14 Nov 2025 00:00:00 GMT",
-      player_id: "CV0FK1BJScNyvRIhf8QqxEzgd5zzI1RQ",
-      pokedex_number: 445,
-      type1: "dragon",
-      type2: "ground",
-    },
-  ]);
+  const [myPokemon, setMyPokemon] = useState<Pokemon[] | null>();
 
   const addPokemon = (pokemon: Pokemon) => {
     setMyPokemon((prev) => [...prev, pokemon]);
@@ -59,7 +38,7 @@ export function PokemonProvider({ children }: { children: ReactNode }) {
 
   const deletePokemon = (pokemonName: string) => {
     setMyPokemon((prev) =>
-      prev.filter((pokemon) => pokemon.name != pokemonName)
+      prev.filter((pokemon) => pokemon.name !== pokemonName)
     );
     router.replace("/");
   };
@@ -74,7 +53,7 @@ export function PokemonProvider({ children }: { children: ReactNode }) {
 
   return (
     <PokemonContext.Provider
-      value={{ myPokemon, deletePokemon, addPokemon, changeMote }}
+      value={{ myPokemon, setMyPokemon, addPokemon, deletePokemon, changeMote }}
     >
       {children}
     </PokemonContext.Provider>

@@ -1,7 +1,7 @@
 import { View, Text, ScrollView, Image } from "react-native";
 import { useRouter } from "expo-router";
 import { useFriendRequests } from "hooks/useFriendRequests";
-import { useFriends } from "hooks/useFriends";
+import { useFriends } from "contexts/useFriends";
 import GlobalButton from "@/components/GlobalButton";
 
 export default function Solicitudes() {

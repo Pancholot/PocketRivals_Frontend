@@ -1,15 +1,15 @@
 import { AxiosError } from "axios";
 import axiosInstance from "./axiosInstance";
 import { secureStore } from "functions/secureStore";
+import { jwtDecode } from "jwt-decode";
 
 const logIn = async (credentials: { email: string; password: string }) => {
   try {
     const response = await axiosInstance.post("/login", credentials);
     const { access_token, refresh_token } = response.data;
-    console.log("Response data:", response.data);
     secureStore.setItem("accessToken", access_token);
     secureStore.setItem("refreshToken", refresh_token);
-    return "Bienvenido";
+    return { ok: true, access_token };
   } catch (error) {
     if (error instanceof AxiosError) {
       console.error(

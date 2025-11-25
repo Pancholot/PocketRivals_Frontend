@@ -1,4 +1,4 @@
-export const get = async (url, params = {}) => {
+export const get = async (url: string, params = {}, token?: string) => {
   try {
     // 1. Construir URL con parámetros (ej: ?limit=20&offset=0)
     const urlObject = new URL(url);
@@ -11,7 +11,7 @@ export const get = async (url, params = {}) => {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        // 'Authorization': 'Bearer ...' // Aquí podrías agregar tokens si fuera necesario
+        Authorization: `Bearer ${token}`,
       },
     });
 

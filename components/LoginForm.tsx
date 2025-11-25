@@ -15,11 +15,15 @@ import GlobalButton from "./GlobalButton";
 import { usePreload } from "contexts/PreloadContext";
 import { logIn } from "api/apiService";
 import PasswordInput from "./PasswordInput";
+import { useUser } from "contexts/UserContext";
+import { decodeJwtForData } from "functions/UI.utils";
+import { jwtDecode } from "jwt-decode";
 
 export default function LoginForm({ setFormType }) {
   const [email, setEmail] = useState<string>("");
   const [emailError, setEmailError] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const { setUser } = useUser();
   const { playMusic } = useMusic();
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const router = useRouter();
@@ -60,10 +64,11 @@ export default function LoginForm({ setFormType }) {
       console.log("Logging in with", { email, password });
       const message = await logIn({ email, password });
 
-      if (message === "Bienvenido") {
+      if (message.ok) {
+        setUser(jwtDecode(message.access_token));
         router.replace("/capturar");
       } else {
-        Alert.alert("Inicio de sesión fallido", message);
+        Alert.alert("Inicio de sesión fallido");
       }
 
       setEmail("");

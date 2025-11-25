@@ -1,3 +1,5 @@
+import { jwtDecode } from "jwt-decode";
+
 export const POKEMON_TYPE_COLORS = {
   normal: "#C6C6A7",
   fire: "#F5AC78",
@@ -119,3 +121,12 @@ export const YOUR_POKEMON_DATA = [
     type1: "psychic",
   },
 ];
+
+export const decodeJwtForData = async (token) => {
+  try {
+    console.log(jwtDecode(token));
+    return jwtDecode(token);
+  } catch (error) {
+    throw error;
+  }
+};

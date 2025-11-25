@@ -1,11 +1,13 @@
 import { View, Text, Image, ScrollView, TextInput } from "react-native";
 import { Feather } from "@expo/vector-icons";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ScanQR from "@/components/scanQR";
 import { useRouter } from "expo-router";
 import { useFriendRequests } from "hooks/useFriendRequests";
-import { useFriends } from "hooks/useFriends";
+import { useFriends } from "contexts/useFriends";
 import GlobalButton from "@/components/GlobalButton";
+import { secureStore } from "functions/secureStore";
+import axiosInstance from "api/axiosInstance";
 
 export default function Amigos() {
   const [showAddBox, setShowAddBox] = useState(false);
@@ -15,7 +17,26 @@ export default function Amigos() {
   const { addRequest } = useFriendRequests();
   const [isProcessingScan, setIsProcessingScan] = useState(false);
 
-  const { friends } = useFriends();
+  const { friends, setFriends } = useFriends();
+
+  useEffect(() => {
+    try {
+      const gettingPokemon = async () => {
+        const token = await secureStore.getItem("accessToken");
+        const { data } = await axiosInstance.get(`/friends/list`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        console.log(data);
+        setFriends(data.friends);
+      };
+
+      gettingPokemon();
+    } catch (error) {
+    } finally {
+    }
+  }, []);
 
   const sendFriendRequest = (idValue: string) => {
     if (!idValue.trim()) return;
@@ -58,28 +79,35 @@ export default function Amigos() {
 
       {/* FRIEND LIST */}
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-        {friends.map((f) => (
-          <View
-            key={f.id}
-            className="bg-black border border-red-600 rounded-3xl px-4 py-4 mb-4 flex-row items-center"
-          >
-            <Image
-              source={f.img}
-              className="w-16 h-16 rounded-full border-2 border-red-600 mr-4"
-            />
+        {friends.length == 0 && <Text>No tienes amigos</Text>}
+        {friends &&
+          friends?.map((f) => (
+            <View
+              key={f.id}
+              className="bg-black border border-red-600 rounded-3xl px-4 py-4 mb-4 flex-row items-center"
+            >
+              <Image
+                source={
+                  f.img || {
+                    uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRUSeONpWEdtwCAskidQnoPr7sAHmNWmbnnHw&s",
+                  }
+                }
+                className="w-16 h-16 rounded-full border-2 border-red-600 mr-4"
+              />
 
-            <View>
-              {/* Nombre + ID */}
-              <Text className="text-white text-lg font-bold">
-                {f.name} ({f.realId})
-              </Text>
+              <View>
+                {/* Nombre + ID */}
+                <Text className="text-white text-lg font-bold">
+                  {f.username}
+                </Text>
+                <Text className="text-gray-700 text-sm font-bold">{f.id}</Text>
 
-              <Text className="text-red-600">
-                Último capturado: {f.lastCatch}
-              </Text>
+                <Text className="text-red-600">
+                  Último capturado: {f.last_captured}
+                </Text>
+              </View>
             </View>
-          </View>
-        ))}
+          ))}
       </ScrollView>
 
       {/* BOTÓN AGREGAR AMIGO */}

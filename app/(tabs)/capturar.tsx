@@ -9,6 +9,10 @@ import CaptureButtonImage from "@/assets/icons/capture-button.png";
 import { numeroAleatorio, pokemonSprite, PokemonName } from "functions/helpers";
 import { usePokemon } from "contexts/PokemonContext";
 import GlobalButton from "@/components/GlobalButton";
+import { secureStore } from "functions/secureStore";
+import { jwtDecode } from "jwt-decode";
+import { decodeJwtForData } from "functions/UI.utils";
+import { useUser } from "contexts/UserContext";
 
 export default function Capturar() {
   const { stopMusic, playMusic, isPlaying } = useMusic();
@@ -16,10 +20,12 @@ export default function Capturar() {
   const [musicWasPlaying, setMusicWasPlaying] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const [showPokemon, setShowPokemon] = useState(false);
+  const [username, setUsername] = useState("");
 
   const [pokemonNameCaptured, setPokemonName] = useState("");
   const [pokemonImage, setPokemonImage] = useState(null);
   const [capturedId, setCapturedId] = useState<number | null>(null);
+  const { user } = useUser();
 
   // Animaciones
   const shakeAnim = useRef(new Animated.Value(0)).current;
@@ -267,6 +273,9 @@ export default function Capturar() {
 
   return (
     <View className="h-full w-full">
+      <Text className="text-white absolute font-extrabold tracking-widest z-50 top-28 left-5 text-xl bg-gray-400/30 rounded-xl p-2">
+        Hola, {user.user}!
+      </Text>
       <Video
         source={require("@/assets/videos/pokemonRivals.mp4")}
         style={{

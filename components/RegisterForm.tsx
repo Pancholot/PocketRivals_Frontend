@@ -10,7 +10,6 @@ import {
 } from "react-native";
 import React, { Dispatch, SetStateAction, useState } from "react";
 import { useMusic } from "contexts/MusicContext";
-import { useRouter } from "expo-router";
 import GlobalButton from "./GlobalButton";
 import { usePreload } from "contexts/PreloadContext";
 import { register } from "api/apiService";
