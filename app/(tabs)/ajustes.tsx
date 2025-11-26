@@ -2,7 +2,7 @@ import { View, Text, Image, Alert } from "react-native";
 import QRCode from "@/components/QRCode";
 import * as Clipboard from "expo-clipboard";
 import { Feather } from "@expo/vector-icons";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ScanQR from "@/components/scanQR";
 import { useMusic } from "contexts/MusicContext";
 import { useRouter } from "expo-router";
@@ -10,16 +10,54 @@ import EditNameModal from "@/components/EditNameModal";
 import { SafeAreaView } from "react-native-safe-area-context";
 import GlobalButton from "@/components/GlobalButton";
 import { logout } from "api/apiService";
+import { secureStore } from "functions/secureStore";
+import axiosInstance from "api/axiosInstance";
+import { useUser } from "contexts/UserContext";
 
-const ajustes = () => {
-  const userId = "12345";
-  const [username, setUsername] = useState("AshKetchum");
+export default function Ajustes() {
+  const { user, setUser, loadUserFromToken } = useUser();
+  useEffect(() => {
+    if (!user) {
+      loadUserFromToken();
+    }
+  }, [user]);
+
+  const username = user?.username ?? "";
   const [editingName, setEditingName] = useState(false);
 
+  const userId = user?.id ?? "";
+  const shortId = userId ? `${userId.slice(0, 4)}...${userId.slice(-4)}` : "";
+
   const profileImage = require("@/assets/icons/profilePic.png");
-  const [showScanner, setShowScanner] = useState(false);
   const { isPlaying, playMusic, stopMusic } = useMusic();
   const router = useRouter();
+
+  const updateUsername = async (newUsername: string) => {
+    try {
+      const token = await secureStore.getItem("accessToken");
+
+      await axiosInstance.put(
+        "/player/change_username",
+        { username: newUsername },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      // Actualizar el contexto del usuario
+      setUser((prev) => ({ ...prev, username: newUsername }));
+
+      Alert.alert("Éxito", "Tu nombre de usuario ha sido actualizado.");
+    } catch (error: any) {
+      console.error("Error actualizando username:", error);
+
+      Alert.alert(
+        "Error",
+        error?.response?.data?.message || "No se pudo actualizar el usuario."
+      );
+    }
+  };
 
   const copyIDToClipboard = async () => {
     Clipboard.setStringAsync(userId);
@@ -57,7 +95,11 @@ const ajustes = () => {
 
         {/* Código QR */}
         <View className="w-72 h-72 rounded-3xl overflow-hidden border-4 border-white items-center justify-center mb-4">
-          <QRCode value={`${userId}`} />
+          {userId && userId.length > 0 ? (
+            <QRCode value={userId} />
+          ) : (
+            <Text className="text-white">Cargando ID...</Text>
+          )}
         </View>
 
         {/* Nombre de Usuario */}
@@ -75,16 +117,16 @@ const ajustes = () => {
           currentName={username}
           onClose={() => setEditingName(false)}
           onSave={(newName) => {
-            setUsername(newName);
+            updateUsername(newName);
             setEditingName(false);
           }}
         />
 
         {/* ID y para Copiar la misma */}
-        <View className="flex-row items-center mb-4">
+        <View className="flex-row items-center mb-4 pl-6">
           <View className="bg-black border border-red-600 px-5 py-3 rounded-2xl mr-3 items-center">
             <Text className="text-red-600 font-semibold mt-1">
-              ID: {userId}
+              ID: {shortId}
             </Text>
           </View>
           <GlobalButton
@@ -107,20 +149,7 @@ const ajustes = () => {
             {isPlaying ? "Pausar Música" : "Prender Música"}
           </Text>
         </GlobalButton>
-
-        {showScanner && (
-          <View className="absolute inset-0 bg-black/80 z-50 flex-1">
-            <ScanQR
-              onScanned={(value) => {
-                alert("QR data: " + value);
-              }}
-              onClose={() => setShowScanner(false)}
-            />
-          </View>
-        )}
       </View>
     </SafeAreaView>
   );
-};
-
-export default ajustes;
+}

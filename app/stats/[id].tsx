@@ -10,17 +10,19 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import React, { useEffect, useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { pokemonSprite } from "functions/helpers"; // Asegúrate que esta ruta sea correcta en tu proyecto
-import { get } from "functions/Fetch"; // Asegúrate que esta ruta sea correcta
+import { pokemonSprite } from "functions/helpers";
+import { get } from "functions/Fetch";
 import { Audio, AVPlaybackStatus } from "expo-av";
 import GlobalButton from "@/components/GlobalButton";
 import EditNameModal from "@/components/EditNameModal";
 import { Feather } from "@expo/vector-icons";
 import { YOUR_POKEMON_DATA } from "functions/UI.utils";
 import { usePokemon } from "contexts/PokemonContext";
+import { secureStore } from "functions/secureStore";
+import axiosInstance from "api/axiosInstance";
 
 const PokemonStats = () => {
-  const [loading, setLoading] = useState<boolean>(true); // Inicializamos en true
+  const [loading, setLoading] = useState<boolean>(true);
   const [basePokemonData, setBasePokemonData] = useState<any>(null);
 
   const pokemonType = basePokemonData?.types?.[0]?.type?.name || "normal";
@@ -50,6 +52,37 @@ const PokemonStats = () => {
   const { id } = useLocalSearchParams();
   const router = useRouter();
   const { changeMote, myPokemon } = usePokemon();
+  const numericId = Number(id);
+  const ownedPokemon = myPokemon.find((p) => p.pokedex_number === numericId);
+
+  const updateMote = async (newMote: string) => {
+    try {
+      if (!ownedPokemon) {
+        Alert.alert("Error", "No encontramos a este Pokémon en tu lista.");
+        return;
+      }
+
+      const token = await secureStore.getItem("accessToken");
+
+      await axiosInstance.put(
+        "/pokemon/change_mote",
+        {
+          pokemon_id: ownedPokemon.id,
+          mote: newMote,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      changeMote(ownedPokemon.pokedex_number, newMote);
+    } catch (error) {
+      console.error("Error actualizando mote:", error);
+      Alert.alert("Error", "No se pudo actualizar el mote.");
+    }
+  };
 
   // --- Lógica de Audio ---
   const playCry = async (cryUrl: string) => {
@@ -91,14 +124,12 @@ const PokemonStats = () => {
   }, [id]);
 
   useEffect(() => {
-    const found = myPokemon.find((p) => p.pokedex_number == Number(id));
-
-    if (found?.mote) {
-      setPokemonName(found.mote);
+    if (ownedPokemon?.mote) {
+      setPokemonName(ownedPokemon.mote);
     } else {
       setPokemonName("");
     }
-  }, [myPokemon, id]);
+  }, [ownedPokemon]);
 
   // --- 1. Vista de Carga ---
   if (loading) {
@@ -131,7 +162,7 @@ const PokemonStats = () => {
         onClose={() => setEditingName(false)}
         onSave={(newName) => {
           setPokemonName(newName);
-          changeMote(Number(id), newName);
+          updateMote(newName);
           setEditingName(false);
         }}
       />

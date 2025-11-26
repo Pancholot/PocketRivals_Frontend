@@ -6,10 +6,9 @@ import { jwtDecode } from "jwt-decode";
 const logIn = async (credentials: { email: string; password: string }) => {
   try {
     const response = await axiosInstance.post("/login", credentials);
-    const { access_token, refresh_token } = response.data;
+    const { access_token, user } = response.data;
     secureStore.setItem("accessToken", access_token);
-    secureStore.setItem("refreshToken", refresh_token);
-    return { ok: true, access_token };
+    return { ok: true, access_token, user };
   } catch (error) {
     if (error instanceof AxiosError) {
       console.error(

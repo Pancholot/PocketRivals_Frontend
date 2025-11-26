@@ -30,7 +30,7 @@ const PokemonContext = createContext<PokemonContextType>({
 
 export function PokemonProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
-  const [myPokemon, setMyPokemon] = useState<Pokemon[] | null>();
+  const [myPokemon, setMyPokemon] = useState<Pokemon[]>([]);
 
   const addPokemon = (pokemon: Pokemon) => {
     setMyPokemon((prev) => [...prev, pokemon]);

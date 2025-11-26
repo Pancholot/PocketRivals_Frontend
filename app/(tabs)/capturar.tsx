@@ -274,7 +274,7 @@ export default function Capturar() {
   return (
     <View className="h-full w-full">
       <Text className="text-white absolute font-extrabold tracking-widest z-50 top-28 left-5 text-xl bg-gray-400/30 rounded-xl p-2">
-        Hola, {user.user}!
+        Hola, {user?.username}!
       </Text>
       <Video
         source={require("@/assets/videos/pokemonRivals.mp4")}
