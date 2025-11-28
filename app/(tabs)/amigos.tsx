@@ -1,9 +1,9 @@
-import { View, Text, Image, ScrollView, TextInput } from "react-native";
+import { View, Text, Image, ScrollView, TextInput, Alert } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import ScanQR from "@/components/scanQR";
 import { useRouter } from "expo-router";
-import { useFriendRequests } from "hooks/useFriendRequests";
+import { useFriendRequests } from "contexts/useFriendRequests";
 import { useFriends } from "contexts/useFriends";
 import GlobalButton from "@/components/GlobalButton";
 import { secureStore } from "functions/secureStore";
@@ -14,8 +14,9 @@ export default function Amigos() {
   const [friendId, setFriendId] = useState("");
   const [showScanner, setShowScanner] = useState(false);
   const router = useRouter();
-  const { addRequest } = useFriendRequests();
   const [isProcessingScan, setIsProcessingScan] = useState(false);
+
+  const { requests, setRequests } = useFriendRequests();
 
   const { friends, setFriends } = useFriends();
 
@@ -28,7 +29,6 @@ export default function Amigos() {
             Authorization: `Bearer ${token}`,
           },
         });
-        console.log(data);
         setFriends(data.friends);
       };
 
@@ -39,28 +39,30 @@ export default function Amigos() {
   }, []);
 
   const sendFriendRequest = (idValue: string) => {
-    if (!idValue.trim()) return;
+    const gettingRequests = async () => {
+      try {
+        console.log(idValue);
+        const token = await secureStore.getItem("accessToken");
+        const request = await axiosInstance.post(
+          `/friends/send_request`,
+          {
+            receiver_id: idValue,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
-    if (isProcessingScan) return;
-    setIsProcessingScan(true);
-
-    const newRequest = {
-      id: Date.now(),
-      name: "Entrenador",
-      realId: idValue,
-      img: require("@/assets/icons/profilePic.png"),
+        router.replace("/amigos");
+        Alert.alert("Satisfactorio", "Se ha mandado la solicitud de amistad.");
+      } catch (error) {
+        Alert.alert("Error", "Ha ocurrido un error ):");
+      }
     };
 
-    addRequest(newRequest);
-
-    setFriendId("");
-    setShowAddBox(false);
-    setShowScanner(false);
-    router.push("/solicitudes");
-
-    setTimeout(() => {
-      setIsProcessingScan(false);
-    }, 500);
+    gettingRequests();
   };
 
   return (

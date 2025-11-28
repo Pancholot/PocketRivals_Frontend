@@ -3,7 +3,7 @@ import "../global.css";
 import AuthScreen from "screens/AuthScreen";
 import { Stack } from "expo-router";
 import { MusicProvider } from "contexts/MusicContext";
-import { FriendRequestProvider } from "hooks/useFriendRequests";
+import { FriendRequestProvider } from "contexts/useFriendRequests";
 import { FriendsProvider } from "contexts/useFriends";
 import { PokemonProvider } from "contexts/PokemonContext";
 import { PreloadProvider } from "contexts/PreloadContext";

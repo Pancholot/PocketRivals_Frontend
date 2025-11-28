@@ -1,13 +1,88 @@
 import { View, Text, ScrollView, Image } from "react-native";
 import { useRouter } from "expo-router";
-import { useFriendRequests } from "hooks/useFriendRequests";
-import { useFriends } from "contexts/useFriends";
+import { useFriendRequests } from "contexts/useFriendRequests";
 import GlobalButton from "@/components/GlobalButton";
+import { useEffect } from "react";
+import { secureStore } from "functions/secureStore";
+import axiosInstance from "api/axiosInstance";
 
 export default function Solicitudes() {
   const router = useRouter();
-  const { requests, removeRequest } = useFriendRequests();
-  const { addFriend } = useFriends();
+  const { requests, setRequests } = useFriendRequests();
+
+  useEffect(() => {
+    try {
+      const gettingRequests = async () => {
+        const token = await secureStore.getItem("accessToken");
+        const { data } = await axiosInstance.get(`/friends/check_requests`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        setRequests(data);
+      };
+
+      gettingRequests();
+    } catch (error) {
+      console.log(error.message);
+    }
+  }, []);
+
+  function handleAcceptRequest(r: {
+    id: number;
+    petitioner_name: string;
+    petitioner: string;
+    name: string;
+    img: any;
+  }) {
+    const gettingRequests = async () => {
+      const token = await secureStore.getItem("accessToken");
+      const request = await axiosInstance.post(
+        `/friends/accept_request`,
+        {
+          friend_id: r.petitioner,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      router.replace("/amigos");
+    };
+
+    gettingRequests();
+  }
+
+  function handleRejectRequest(r: {
+    id: number;
+    petitioner_name: string;
+    petitioner: string;
+    name: string;
+    img: any;
+  }) {
+    const gettingRequests = async () => {
+      const token = await secureStore.getItem("accessToken");
+      const request = await axiosInstance.post(
+        `/friends/reject_request`,
+        {
+          friend_id: r.petitioner,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      router.replace("/amigos");
+    };
+
+    gettingRequests();
+  }
+
   return (
     <View className="flex-1 bg-red-800 pt-20 px-5">
       {/* HEADER */}
@@ -29,32 +104,29 @@ export default function Solicitudes() {
 
         {requests.map((r) => (
           <View
-            key={r.id}
+            key={r.petitioner}
             className="bg-black border border-red-600 rounded-3xl px-4 py-4 mb-4 flex-row items-center"
           >
             {/* FOTO */}
             <Image
-              source={r.img}
+              source={
+                r.img || {
+                  uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRUSeONpWEdtwCAskidQnoPr7sAHmNWmbnnHw&s",
+                }
+              }
               className="w-16 h-16 rounded-full border-2 border-red-600 mr-4"
             />
 
             {/* INFO + BOTONES */}
             <View className="flex-1">
               <Text className="text-white font-bold text-lg">
-                {r.name} ({r.realId})
+                {r.petitioner_name}
               </Text>
 
               <View className="flex-row gap-4 mt-3">
                 <GlobalButton
                   onPress={() => {
-                    addFriend({
-                      id: Date.now(),
-                      name: r.name,
-                      realId: r.realId,
-                      lastCatch: "N/A",
-                      img: r.img,
-                    });
-                    removeRequest(r.id);
+                    handleAcceptRequest(r);
                   }}
                   className="bg-red-700 px-4 py-2 rounded-xl border-2 border-white"
                 >
@@ -62,7 +134,9 @@ export default function Solicitudes() {
                 </GlobalButton>
 
                 <GlobalButton
-                  onPress={() => removeRequest(r.id)}
+                  onPress={() => {
+                    handleRejectRequest(r);
+                  }}
                   className="bg-white px-4 py-2 rounded-xl border-2 border-red-600"
                 >
                   <Text className="text-black font-semibold">Rechazar</Text>

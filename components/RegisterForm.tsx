@@ -32,7 +32,7 @@ const RegisterForm = ({ setFormType }) => {
   };
 
   const validateEmail = (value: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; //Expresion regular
 
     if (!emailRegex.test(value)) {
       setEmailError("Ingresa un correo válido.");
