@@ -20,6 +20,35 @@ export default function Amigos() {
 
   const { friends, setFriends } = useFriends();
 
+  const confirmDelete = (friendId: string) => {
+    Alert.alert("Eliminar amigo", "¿Seguro que deseas eliminar a este amigo?", [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Eliminar",
+        style: "destructive",
+        onPress: () => removeFriend(friendId),
+      },
+    ]);
+  };
+
+  const removeFriend = async (friendId: string) => {
+    try {
+      const token = await secureStore.getItem("accessToken");
+
+      await axiosInstance.delete("/friends/remove", {
+        data: { friend_id: friendId },
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      setFriends((prev) => prev.filter((f) => f.id !== friendId));
+
+      Alert.alert("Listo", "Amigo eliminado correctamente.");
+    } catch (error) {
+      console.log("Error eliminando amigo:", error);
+      Alert.alert("Error", "No se pudo eliminar al amigo.");
+    }
+  };
+
   useEffect(() => {
     try {
       const gettingPokemon = async () => {
@@ -56,8 +85,31 @@ export default function Amigos() {
         );
 
         router.replace("/amigos");
-        Alert.alert("Satisfactorio", "Se ha mandado la solicitud de amistad.");
-      } catch (error) {
+        Alert.alert(
+          "Enviado con éxito",
+          "Se ha mandado la solicitud de amistad."
+        );
+        setFriendId("");
+        setShowAddBox(false);
+        setShowScanner(false);
+      } catch (error: any) {
+        const raw = error?.response?.data?.message?.toLowerCase() || "";
+
+        // Detectar solicitudes duplicadas
+        if (
+          raw.includes("1062") ||
+          raw.includes("duplicate") ||
+          raw.includes("entry")
+        ) {
+          Alert.alert(
+            "Solicitud pendiente",
+            "Ya has enviado una solicitud a este usuario."
+          );
+
+          setFriendId("");
+          return;
+        }
+
         Alert.alert("Error", "Ha ocurrido un error ):");
       }
     };
@@ -83,33 +135,52 @@ export default function Amigos() {
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         {friends.length == 0 && <Text>No tienes amigos</Text>}
         {friends &&
-          friends?.map((f) => (
-            <View
-              key={f.id}
-              className="bg-black border border-red-600 rounded-3xl px-4 py-4 mb-4 flex-row items-center"
-            >
-              <Image
-                source={
-                  f.img || {
-                    uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRUSeONpWEdtwCAskidQnoPr7sAHmNWmbnnHw&s",
-                  }
-                }
-                className="w-16 h-16 rounded-full border-2 border-red-600 mr-4"
-              />
+          friends?.map((f) => {
+            const shortId = f.id
+              ? `${f.id.slice(0, 4)}...${f.id.slice(-4)}`
+              : "";
 
-              <View>
-                {/* Nombre + ID */}
-                <Text className="text-white text-lg font-bold">
-                  {f.username}
-                </Text>
-                <Text className="text-gray-700 text-sm font-bold">{f.id}</Text>
+            return (
+              <View
+                key={f.id}
+                className="bg-black border border-red-600 rounded-3xl px-4 py-4 mb-4 flex-row justify-between items-center"
+              >
+                {/* IZQUIERDA: imagen + info */}
+                <View className="flex-row items-center">
+                  <Image
+                    source={
+                      f.img || {
+                        uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRUSeONpWEdtwCAskidQnoPr7sAHmNWmbnnHw&s",
+                      }
+                    }
+                    className="w-16 h-16 rounded-full border-2 border-red-600 mr-4"
+                  />
 
-                <Text className="text-red-600">
-                  Último capturado: {f.last_captured}
-                </Text>
+                  <View>
+                    <Text className="text-white text-lg font-bold">
+                      {f.username}
+                    </Text>
+
+                    <Text className="text-gray-700 text-sm font-bold">
+                      {shortId}
+                    </Text>
+
+                    <Text className="text-red-600">
+                      Último capturado: {f.last_captured}
+                    </Text>
+                  </View>
+                </View>
+
+                {/* DERECHA: botón borrar */}
+                <GlobalButton
+                  onPress={() => confirmDelete(f.id)}
+                  className="w-10 h-10 bg-transparent items-center justify-center"
+                >
+                  <Feather name="trash-2" size={24} color="#ff4444" />
+                </GlobalButton>
               </View>
-            </View>
-          ))}
+            );
+          })}
       </ScrollView>
 
       {/* BOTÓN AGREGAR AMIGO */}

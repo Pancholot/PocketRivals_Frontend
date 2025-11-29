@@ -51,7 +51,7 @@ const PokemonStats = () => {
   const [editingName, setEditingName] = useState<boolean>(false);
   const { id } = useLocalSearchParams();
   const router = useRouter();
-  const { changeMote, myPokemon } = usePokemon();
+  const { changeMote, myPokemon, deletePokemon } = usePokemon();
   const numericId = Number(id);
   const ownedPokemon = myPokemon.find((p) => p.pokedex_number === numericId);
 
@@ -294,6 +294,62 @@ const PokemonStats = () => {
                 />
               </View>
             </View>
+          </View>
+          {/* BOTÓN BORRAR */}
+          <View className="px-6 mb-10">
+            <GlobalButton
+              className="bg-red-700 border-2 border-black py-4 rounded-2xl shadow-xl"
+              onPress={() => {
+                if (!ownedPokemon) {
+                  return Alert.alert(
+                    "Error",
+                    "No encontramos este Pokémon en tu colección."
+                  );
+                }
+
+                Alert.alert(
+                  "Liberar Pokémon",
+                  `¿Seguro que deseas liberar a ${pokemonName || basePokemonData.name}?`,
+                  [
+                    { text: "Cancelar", style: "cancel" },
+                    {
+                      text: "Liberar",
+                      style: "destructive",
+                      onPress: async () => {
+                        try {
+                          const token =
+                            await secureStore.getItem("accessToken");
+
+                          await axiosInstance.delete("/pokemon/delete", {
+                            headers: {
+                              Authorization: `Bearer ${token}`,
+                            },
+                            data: {
+                              pokemon_id: ownedPokemon.id,
+                            },
+                          });
+
+                          deletePokemon(ownedPokemon.name);
+
+                          Alert.alert("Éxito", "Pokémon liberado.");
+                          router.replace("/pokemon");
+                        } catch (e) {
+                          console.log("Error borrando Pokémon:", e);
+                          Alert.alert(
+                            "Error",
+                            "No se pudo liberar el Pokémon."
+                          );
+                        }
+                      },
+                    },
+                  ]
+                );
+              }}
+            >
+              <Text className="text-white font-bold text-center text-lg tracking-wide">
+                Liberar Pokémon
+              </Text>
+            </GlobalButton>
           </View>
         </View>
       </ScrollView>

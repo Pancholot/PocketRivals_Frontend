@@ -33,7 +33,14 @@ export function PokemonProvider({ children }: { children: ReactNode }) {
   const [myPokemon, setMyPokemon] = useState<Pokemon[]>([]);
 
   const addPokemon = (pokemon: Pokemon) => {
-    setMyPokemon((prev) => [...prev, pokemon]);
+    setMyPokemon((prev) => {
+      const updated = [pokemon, ...prev];
+
+      return updated.sort(
+        (a, b) =>
+          new Date(b.obtained_at).getTime() - new Date(a.obtained_at).getTime()
+      );
+    });
   };
 
   const deletePokemon = (pokemonName: string) => {

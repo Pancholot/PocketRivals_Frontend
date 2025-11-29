@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Audio, Video, ResizeMode } from "expo-av";
 import { useMusic } from "contexts/MusicContext";
 import { Dimensions, Easing } from "react-native";
+import axiosInstance from "api/axiosInstance";
 
 import pokemonRivals from "@/assets/videos/pokemonRivals.mp4";
 import CaptureButtonImage from "@/assets/icons/capture-button.png";
@@ -171,76 +172,89 @@ export default function Capturar() {
 
   // CAPTURAR
   const handleCapture = async () => {
-    if (isAnimating) return;
+    if (isAnimating || isCooldown) return;
 
     setIsAnimating(true);
     setMusicWasPlaying(isPlaying);
     stopMusic();
 
-    const id = numeroAleatorio();
-    setCapturedId(id);
-    const resName = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
-    const dataName = await resName.json();
-    setPokemonName(PokemonName(dataName.species.name));
-    setPokemonImage({ uri: pokemonSprite(id) });
+    try {
+      const token = await secureStore.getItem("accessToken");
 
-    const shake = startShake();
-    shake.start();
+      const { data } = await axiosInstance.get("/capture_pokemon", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-    playCaptureSound();
+      const id = data.pokedex_number;
+      setCapturedId(id);
+      setPokemonName(PokemonName(data.name));
+      setPokemonImage({ uri: pokemonSprite(id) });
 
-    await new Promise((res) => setTimeout(res, 5000));
+      const shake = startShake();
+      shake.start();
 
-    shake.stop();
-    shakeAnim.setValue(0);
+      await playCaptureSound();
 
-    // Ocultar pokeball + flash + mostrar Pokémon
-    Animated.timing(pokeballOpacity, {
-      toValue: 0,
-      duration: 400,
-      useNativeDriver: true,
-    }).start(() => {
-      Animated.sequence([
-        Animated.timing(flashOpacity, {
-          toValue: 1,
-          duration: 150,
-          useNativeDriver: true,
-        }),
-        Animated.timing(flashOpacity, {
-          toValue: 0,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-      ]).start();
+      await new Promise((res) => setTimeout(res, 5000));
 
-      setShowPokemon(true);
-      startPokemonBounce();
+      shake.stop();
+      shakeAnim.setValue(0);
 
-      Animated.spring(pokemonScale, {
-        toValue: 1,
-        friction: 6,
-        tension: 100,
+      // Ocultar pokeball + flash + mostrar Pokémon
+      Animated.timing(pokeballOpacity, {
+        toValue: 0,
+        duration: 400,
         useNativeDriver: true,
-      }).start();
-    });
+      }).start(() => {
+        Animated.sequence([
+          Animated.timing(flashOpacity, {
+            toValue: 1,
+            duration: 150,
+            useNativeDriver: true,
+          }),
+          Animated.timing(flashOpacity, {
+            toValue: 0,
+            duration: 300,
+            useNativeDriver: true,
+          }),
+        ]).start();
 
-    await new Promise((res) => setTimeout(res, 9000));
+        setShowPokemon(true);
+        startPokemonBounce();
 
-    if (soundObject.current) {
-      try {
-        await soundObject.current.stopAsync();
-        await soundObject.current.unloadAsync();
-      } catch {}
-      soundObject.current = null;
+        Animated.spring(pokemonScale, {
+          toValue: 1,
+          friction: 6,
+          tension: 100,
+          useNativeDriver: true,
+        }).start();
+      });
+
+      await new Promise((res) => setTimeout(res, 9000));
+    } catch (err) {
+      console.log("Error al capturar:", err);
+      // si quieres:
+      // Alert.alert("Error", traducirError(err.response?.data?.message));
+    } finally {
+      // limpiar sonido
+      if (soundObject.current) {
+        try {
+          await soundObject.current.stopAsync();
+          await soundObject.current.unloadAsync();
+        } catch {}
+        soundObject.current = null;
+      }
+
+      setIsAnimating(false);
+      setIsCooldown(true);
+      startCooldownAnimation();
+
+      setTimeout(() => {
+        setIsCooldown(false);
+      }, COOLDOWN_TIME);
     }
-
-    setIsAnimating(false);
-    setIsCooldown(true);
-    startCooldownAnimation();
-
-    setTimeout(() => {
-      setIsCooldown(false);
-    }, COOLDOWN_TIME);
   };
 
   // REINICIO
@@ -338,43 +352,30 @@ export default function Capturar() {
           />
 
           <GlobalButton
-            className="bg-red-800 border-2 px-8 py-4 rounded-2xl"
+            className="w-[90%] bg-red-700 border-[3px] border-yellow-400 px-6 py-4 rounded-3xl shadow-xl mt-4"
             onPress={async () => {
-              if (!capturedId) return;
-
               // detener audio
               if (soundObject.current) {
                 try {
                   await soundObject.current.stopAsync();
                   await soundObject.current.unloadAsync();
-                } catch {}
+                } catch (e) {
+                  console.log("Error al detener sonido:", e);
+                }
+                soundObject.current = null;
               }
-
-              // API POKÉMON
-              const res = await fetch(
-                `https://pokeapi.co/api/v2/pokemon/${capturedId}`
-              );
-              const data = await res.json();
-
-              addPokemon({
-                id: Math.random().toString(36).substring(2, 12),
-                name: PokemonName(data.species.name),
-                pokedex_number: capturedId,
-                type1: data.types[0].type.name,
-                mote: null,
-                in_team: 0,
-                obtained_at: new Date().toUTCString(),
-                player_id: "yourPlayerId",
-              });
 
               resetCapture();
             }}
           >
-            <Text className="text-white font-bold text-xl text-center">
-              ¡Has atrapado a {pokemonNameCaptured}!{"\n"}
-              <Text className="text-sm text-white">
-                Agregalo a tu colección
-              </Text>
+            <Text className="text-white font-extrabold text-xl text-center">
+              ¡Felicidades,{"\n"}atrapaste a {pokemonNameCaptured}!
+            </Text>
+
+            <View className="mb-2" />
+
+            <Text className="text-yellow-200 font-semibold text-center text-base">
+              Capturar otro Pokémon
             </Text>
           </GlobalButton>
         </View>

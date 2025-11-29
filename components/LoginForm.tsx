@@ -18,6 +18,7 @@ import PasswordInput from "./PasswordInput";
 import { useUser } from "contexts/UserContext";
 import { decodeJwtForData } from "functions/UI.utils";
 import { jwtDecode } from "jwt-decode";
+import { traducirError } from "functions/translateError";
 
 export default function LoginForm({ setFormType }) {
   const [email, setEmail] = useState<string>("");
@@ -84,7 +85,7 @@ export default function LoginForm({ setFormType }) {
         e?.message ||
         "No se pudo conectar al servidor.";
 
-      Alert.alert("Error al iniciar sesión", backendMessage);
+      Alert.alert("Error al iniciar sesión", traducirError(backendMessage));
       console.error("Login failed:", e);
     } finally {
       setIsLoggingIn(false);

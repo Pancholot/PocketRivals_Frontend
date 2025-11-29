@@ -56,26 +56,18 @@ export default function Solicitudes() {
     gettingRequests();
   }
 
-  function handleRejectRequest(r: {
-    id: number;
-    petitioner_name: string;
-    petitioner: string;
-    name: string;
-    img: any;
-  }) {
+  function handleRejectRequest(r) {
     const gettingRequests = async () => {
       const token = await secureStore.getItem("accessToken");
-      const request = await axiosInstance.post(
-        `/friends/reject_request`,
-        {
-          friend_id: r.petitioner,
+
+      await axiosInstance.request({
+        url: "/friends/deny_request",
+        method: "DELETE",
+        data: { friend_id: r.petitioner },
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      });
 
       router.replace("/amigos");
     };
