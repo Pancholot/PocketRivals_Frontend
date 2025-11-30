@@ -71,6 +71,7 @@ export default function LoginForm({ setFormType }) {
           id: decoded.sub,
           username: decoded.user,
         });
+
         router.replace("/capturar");
       } else {
         Alert.alert("Inicio de sesión fallido");

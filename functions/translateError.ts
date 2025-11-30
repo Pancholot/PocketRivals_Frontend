@@ -10,7 +10,7 @@ export const traducirError = (msg: string = "") => {
     return "Este usuario o correo ya está registrado.";
   }
 
-  if (texto.includes("player created")) {
+  if (texto.includes("Player created")) {
     return "Usuario creado exitosamente.";
   }
 

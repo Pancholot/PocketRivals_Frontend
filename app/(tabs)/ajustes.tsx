@@ -32,6 +32,8 @@ export default function Ajustes() {
   const { isPlaying, playMusic, stopMusic } = useMusic();
   const router = useRouter();
 
+  const [showAvatarPicker, setShowAvatarPicker] = useState(false);
+
   const updateUsername = async (newUsername: string) => {
     try {
       const token = await secureStore.getItem("accessToken");
@@ -63,17 +65,22 @@ export default function Ajustes() {
     Clipboard.setStringAsync(userId);
     Alert.alert("¡Copiado!", "Tu ID ha sido copiado al portapapeles.");
   };
+
+  const avatarOptions = Array(6).fill(require("@/assets/icons/profilePic.png"));
+
   return (
     <SafeAreaView className="flex-1 bg-red-800 pt-16">
       <View className="flex-1 items-center justify-start bg-red-800 px-6">
         <View className="w-full flex-row justify-between items-center mb-16">
           <View className="w-20 h-20 bg-gray-800 rounded-full items-center justify-center">
             {/* Foto de Perfil */}
-            <Image
-              source={profileImage}
-              className="ml-10 w-36 h-36 rounded-full border-4 border-black"
-              resizeMode="contain"
-            />
+            <GlobalButton onPress={() => setShowAvatarPicker(true)}>
+              <Image
+                source={profileImage}
+                className="ml-10 w-36 h-36 rounded-full border-4 border-black"
+                resizeMode="contain"
+              />
+            </GlobalButton>
           </View>
 
           {/* Log out */}
@@ -150,6 +157,48 @@ export default function Ajustes() {
           </Text>
         </GlobalButton>
       </View>
+
+      {/* POP-OFF PARA ELEGIR AVATAR */}
+      {showAvatarPicker && (
+        <View className="absolute inset-0 bg-black/60 justify-center items-center z-50 px-10">
+          <View className="bg-black border-2 border-red-600 rounded-3xl w-96 py-6 px-6">
+            {/* TÍTULO */}
+            <Text className="text-white text-xl font-bold text-center mb-6">
+              Selecciona tu foto de perfil
+            </Text>
+
+            {/* 6 AVATARES */}
+            <View className="flex-row flex-wrap justify-center gap-4 mb-4">
+              {avatarOptions.map((avatar, index) => (
+                <GlobalButton
+                  key={index}
+                  onPress={() => {
+                    console.log("Elegiste avatar #", index + 1);
+                    setShowAvatarPicker(false);
+                  }}
+                  className="w-20 h-20 rounded-full overflow-hidden border-2 border-red-700"
+                >
+                  <Image
+                    source={avatar}
+                    className="w-full h-full rounded-full"
+                    resizeMode="cover"
+                  />
+                </GlobalButton>
+              ))}
+            </View>
+
+            {/* Botón cerrar */}
+            <GlobalButton
+              onPress={() => setShowAvatarPicker(false)}
+              className="bg-red-800 border border-red-600 w-full py-3 rounded-xl mt-4"
+            >
+              <Text className="text-center text-white font-bold text-lg">
+                Cerrar
+              </Text>
+            </GlobalButton>
+          </View>
+        </View>
+      )}
     </SafeAreaView>
   );
 }

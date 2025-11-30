@@ -7,7 +7,7 @@ const logIn = async (credentials: { email: string; password: string }) => {
   try {
     const response = await axiosInstance.post("/login", credentials);
     const { access_token, user } = response.data;
-    secureStore.setItem("accessToken", access_token);
+    await secureStore.setItem("accessToken", access_token);
     return { ok: true, access_token, user };
   } catch (error) {
     if (error instanceof AxiosError) {

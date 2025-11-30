@@ -24,6 +24,9 @@ import axiosInstance from "api/axiosInstance";
 const PokemonStats = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [basePokemonData, setBasePokemonData] = useState<any>(null);
+  const params = useLocalSearchParams();
+  const comingFrom = params.from;
+  const friendId = params.friendId;
 
   const pokemonType = basePokemonData?.types?.[0]?.type?.name || "normal";
   const TYPE_COLORS: any = {
@@ -205,12 +208,14 @@ const PokemonStats = () => {
               {pokemonName || basePokemonData?.name || "Desconocido"}
             </Text>
 
-            <GlobalButton
-              onPress={() => setEditingName(true)}
-              className="h-10 w-10 items-center justify-center"
-            >
-              <Feather name="edit" size={26} color="black" />
-            </GlobalButton>
+            {comingFrom !== "amigo" && (
+              <GlobalButton
+                onPress={() => setEditingName(true)}
+                className="h-10 w-10 items-center justify-center"
+              >
+                <Feather name="edit" size={26} color="black" />
+              </GlobalButton>
+            )}
           </View>
 
           {/* Tipos */}
@@ -296,61 +301,63 @@ const PokemonStats = () => {
             </View>
           </View>
           {/* BOTÓN BORRAR */}
-          <View className="px-6 mb-10">
-            <GlobalButton
-              className="bg-red-700 border-2 border-black py-4 rounded-2xl shadow-xl"
-              onPress={() => {
-                if (!ownedPokemon) {
-                  return Alert.alert(
-                    "Error",
-                    "No encontramos este Pokémon en tu colección."
-                  );
-                }
+          {comingFrom !== "amigo" && (
+            <View className="px-6 mb-10">
+              <GlobalButton
+                className="bg-red-700 border-2 border-black py-4 rounded-2xl shadow-xl"
+                onPress={() => {
+                  if (!ownedPokemon) {
+                    return Alert.alert(
+                      "Error",
+                      "No encontramos este Pokémon en tu colección."
+                    );
+                  }
 
-                Alert.alert(
-                  "Liberar Pokémon",
-                  `¿Seguro que deseas liberar a ${pokemonName || basePokemonData.name}?`,
-                  [
-                    { text: "Cancelar", style: "cancel" },
-                    {
-                      text: "Liberar",
-                      style: "destructive",
-                      onPress: async () => {
-                        try {
-                          const token =
-                            await secureStore.getItem("accessToken");
+                  Alert.alert(
+                    "Liberar Pokémon",
+                    `¿Seguro que deseas liberar a ${pokemonName || basePokemonData.name}?`,
+                    [
+                      { text: "Cancelar", style: "cancel" },
+                      {
+                        text: "Liberar",
+                        style: "destructive",
+                        onPress: async () => {
+                          try {
+                            const token =
+                              await secureStore.getItem("accessToken");
 
-                          await axiosInstance.delete("/pokemon/delete", {
-                            headers: {
-                              Authorization: `Bearer ${token}`,
-                            },
-                            data: {
-                              pokemon_id: ownedPokemon.id,
-                            },
-                          });
+                            await axiosInstance.delete("/pokemon/delete", {
+                              headers: {
+                                Authorization: `Bearer ${token}`,
+                              },
+                              data: {
+                                pokemon_id: ownedPokemon.id,
+                              },
+                            });
 
-                          deletePokemon(ownedPokemon.name);
+                            deletePokemon(ownedPokemon.name);
 
-                          Alert.alert("Éxito", "Pokémon liberado.");
-                          router.replace("/pokemon");
-                        } catch (e) {
-                          console.log("Error borrando Pokémon:", e);
-                          Alert.alert(
-                            "Error",
-                            "No se pudo liberar el Pokémon."
-                          );
-                        }
+                            Alert.alert("Éxito", "Pokémon liberado.");
+                            router.replace("/pokemon");
+                          } catch (e) {
+                            console.log("Error borrando Pokémon:", e);
+                            Alert.alert(
+                              "Error",
+                              "No se pudo liberar el Pokémon."
+                            );
+                          }
+                        },
                       },
-                    },
-                  ]
-                );
-              }}
-            >
-              <Text className="text-white font-bold text-center text-lg tracking-wide">
-                Liberar Pokémon
-              </Text>
-            </GlobalButton>
-          </View>
+                    ]
+                  );
+                }}
+              >
+                <Text className="text-white font-bold text-center text-lg tracking-wide">
+                  Liberar Pokémon
+                </Text>
+              </GlobalButton>
+            </View>
+          )}
         </View>
       </ScrollView>
 
@@ -358,7 +365,13 @@ const PokemonStats = () => {
       <View className="absolute bottom-0 left-0 right-0 ios:bg-white/80 bg-white ios:py-4 pb-12 pt-6 px-6">
         <GlobalButton
           className="bg-black w-full py-4 rounded-2xl shadow-md active:opacity-90"
-          onPress={() => router.replace("/pokemon")}
+          onPress={() => {
+            if (comingFrom === "amigo") {
+              router.back();
+            } else {
+              router.replace("/pokemon");
+            }
+          }}
         >
           <Text className="text-white font-bold text-center text-lg">
             Regresar a la lista

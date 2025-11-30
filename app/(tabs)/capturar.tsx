@@ -45,6 +45,7 @@ export default function Capturar() {
   const [isCooldown, setIsCooldown] = useState(false);
   const COOLDOWN_TIME = 3000;
   const cooldownOpacity = useRef(new Animated.Value(1)).current;
+  const [cooldownTimeLeft, setCooldownTimeLeft] = useState(0);
 
   // AUDIO MODE
   useEffect(() => {
@@ -113,8 +114,8 @@ export default function Capturar() {
   const combinedOpacity = Animated.multiply(pokeballOpacity, cooldownOpacity);
 
   useEffect(() => {
-    if (!isAnimating && !showPokemon) startReadyAnimation();
-  }, [isAnimating, showPokemon]);
+    if (!isAnimating && !showPokemon && !isCooldown) startReadyAnimation();
+  }, [isAnimating, showPokemon, isCooldown]);
 
   const pokeballReadyStyle = {
     transform: [
@@ -175,6 +176,8 @@ export default function Capturar() {
     if (isAnimating || isCooldown) return;
 
     setIsAnimating(true);
+
+    // Guarda música
     setMusicWasPlaying(isPlaying);
     stopMusic();
 
@@ -182,78 +185,70 @@ export default function Capturar() {
       const token = await secureStore.getItem("accessToken");
 
       const { data } = await axiosInstance.get("/capture_pokemon", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       const id = data.pokedex_number;
+
       setCapturedId(id);
       setPokemonName(PokemonName(data.name));
       setPokemonImage({ uri: pokemonSprite(id) });
 
-      const shake = startShake();
-      shake.start();
+      // 🔥 Animación de shake (no bloqueante)
+      const shaker = startShake();
+      shaker.start();
 
-      await playCaptureSound();
+      playCaptureSound();
 
-      await new Promise((res) => setTimeout(res, 5000));
+      // 🔥 Después de 5 segundos mostramos el flash + pokemon (sin bloquear)
+      setTimeout(() => {
+        shaker.stop();
+        shakeAnim.setValue(0);
 
-      shake.stop();
-      shakeAnim.setValue(0);
-
-      // Ocultar pokeball + flash + mostrar Pokémon
-      Animated.timing(pokeballOpacity, {
-        toValue: 0,
-        duration: 400,
-        useNativeDriver: true,
-      }).start(() => {
-        Animated.sequence([
-          Animated.timing(flashOpacity, {
-            toValue: 1,
-            duration: 150,
-            useNativeDriver: true,
-          }),
-          Animated.timing(flashOpacity, {
-            toValue: 0,
-            duration: 300,
-            useNativeDriver: true,
-          }),
-        ]).start();
-
-        setShowPokemon(true);
-        startPokemonBounce();
-
-        Animated.spring(pokemonScale, {
-          toValue: 1,
-          friction: 6,
-          tension: 100,
+        Animated.timing(pokeballOpacity, {
+          toValue: 0,
+          duration: 400,
           useNativeDriver: true,
-        }).start();
-      });
+        }).start(() => {
+          Animated.sequence([
+            Animated.timing(flashOpacity, {
+              toValue: 1,
+              duration: 150,
+              useNativeDriver: true,
+            }),
+            Animated.timing(flashOpacity, {
+              toValue: 0,
+              duration: 300,
+              useNativeDriver: true,
+            }),
+          ]).start();
 
-      await new Promise((res) => setTimeout(res, 9000));
+          setShowPokemon(true);
+          startPokemonBounce();
+
+          Animated.spring(pokemonScale, {
+            toValue: 1,
+            friction: 6,
+            tension: 100,
+            useNativeDriver: true,
+          }).start();
+        });
+      }, 5000);
+
+      // 🔥 Después de 14 segundos, terminamos animación global
+      setTimeout(() => {
+        setIsAnimating(false);
+
+        // limpiar audio
+        if (soundObject.current) {
+          soundObject.current.stopAsync().catch(() => {});
+          soundObject.current.unloadAsync().catch(() => {});
+          soundObject.current = null;
+        }
+      }, 9000);
     } catch (err) {
       console.log("Error al capturar:", err);
-      // si quieres:
-      // Alert.alert("Error", traducirError(err.response?.data?.message));
-    } finally {
-      // limpiar sonido
-      if (soundObject.current) {
-        try {
-          await soundObject.current.stopAsync();
-          await soundObject.current.unloadAsync();
-        } catch {}
-        soundObject.current = null;
-      }
-
       setIsAnimating(false);
-      setIsCooldown(true);
-      startCooldownAnimation();
-
-      setTimeout(() => {
-        setIsCooldown(false);
-      }, COOLDOWN_TIME);
     }
   };
 
@@ -261,8 +256,25 @@ export default function Capturar() {
   const resetCapture = () => {
     setShowPokemon(false);
     pokeballOpacity.setValue(1);
-    cooldownOpacity.setValue(1);
     pokemonScale.setValue(0);
+
+    // ⏳ Iniciar cooldown + contador
+    setIsCooldown(true);
+    setCooldownTimeLeft(COOLDOWN_TIME / 1000); // segundos
+
+    startCooldownAnimation();
+
+    const interval = setInterval(() => {
+      setCooldownTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          setIsCooldown(false);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
     if (musicWasPlaying) playMusic();
   };
 
@@ -282,7 +294,6 @@ export default function Capturar() {
         }),
       },
     ],
-    opacity: combinedOpacity,
   };
 
   return (
@@ -316,22 +327,45 @@ export default function Capturar() {
       {/* POKEBALL */}
       {!showPokemon && (
         <View className="absolute inset-0 justify-center items-center z-20">
-          <GlobalButton
-            className="w-60 h-60"
-            onPress={handleCapture}
-            disabled={isAnimating}
-          >
-            <Animated.Image
-              source={CaptureButtonImage}
-              resizeMode="contain"
-              className="w-full h-full"
-              style={[
-                shakeStyle,
-                !isAnimating ? pokeballReadyStyle : {},
-                isCooldown ? pokeballCooldownStyle : {},
-              ]}
-            />
-          </GlobalButton>
+          {/* CONTENEDOR RELATIVE */}
+          <View className="relative w-60 h-60">
+            {/* ⏳ Contador arriba de la pokeball */}
+            {isCooldown && (
+              <Text
+                className="
+                  absolute 
+                  -top-10
+                  left-1/2 
+                  -translate-x-1/2
+                  text-5xl 
+                  font-extrabold 
+                  text-amber-400 
+                  shadow-black 
+                  shadow-lg 
+                  tracking-wide
+                "
+              >
+                {cooldownTimeLeft}
+              </Text>
+            )}
+
+            {/* Pokebola (posición fija) */}
+            <GlobalButton
+              className="absolute inset-0"
+              onPress={handleCapture}
+              disabled={isAnimating || isCooldown}
+            >
+              <Animated.Image
+                source={CaptureButtonImage}
+                resizeMode="contain"
+                className="w-full h-full"
+                style={[
+                  shakeStyle,
+                  !isAnimating && !isCooldown ? pokeballReadyStyle : {},
+                ]}
+              />
+            </GlobalButton>
+          </View>
         </View>
       )}
 

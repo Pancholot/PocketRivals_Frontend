@@ -8,6 +8,11 @@ import { useFriends } from "contexts/useFriends";
 import GlobalButton from "@/components/GlobalButton";
 import { secureStore } from "functions/secureStore";
 import axiosInstance from "api/axiosInstance";
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback } from "react";
+import { useTradeRequests } from "contexts/useTradeRequests";
+import { useTradeNotif } from "contexts/useTradeNotifications";
+import { useWebSocket } from "@/contexts/WebSocketContext";
 
 export default function Amigos() {
   const [showAddBox, setShowAddBox] = useState(false);
@@ -15,8 +20,11 @@ export default function Amigos() {
   const [showScanner, setShowScanner] = useState(false);
   const router = useRouter();
   const [isProcessingScan, setIsProcessingScan] = useState(false);
+  const [selectedFriend, setSelectedFriend] = useState<any>(null);
 
   const { requests, setRequests } = useFriendRequests();
+  const { tradeRequests, setTradeRequests } = useTradeRequests();
+  const [isLoading, setIsLoading] = useState(true);
 
   const { friends, setFriends } = useFriends();
 
@@ -30,6 +38,49 @@ export default function Amigos() {
       },
     ]);
   };
+
+  useEffect(() => {
+    const gettingRequests = async () => {
+      try {
+        setIsLoading(true);
+
+        const token = await secureStore.getItem("accessToken");
+
+        console.log({
+          requests,
+          tradeRequests,
+        });
+
+        //Solicitudes de amistad
+        const { data: friendReqs } = await axiosInstance.get(
+          `/friends/check_requests`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        setRequests(friendReqs);
+
+        //Solicitudes de intercambio
+        const { data: tradeReqs } = await axiosInstance.get(
+          `/trade/pending_requests`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        setTradeRequests(tradeReqs);
+      } catch (error) {
+        console.log("Error cargando solicitudes:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    gettingRequests();
+  }, []);
 
   const removeFriend = async (friendId: string) => {
     try {
@@ -49,23 +100,30 @@ export default function Amigos() {
     }
   };
 
-  useEffect(() => {
-    try {
-      const gettingPokemon = async () => {
-        const token = await secureStore.getItem("accessToken");
-        const { data } = await axiosInstance.get(`/friends/list`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        setFriends(data.friends);
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+
+      const loadFriends = async () => {
+        try {
+          const token = await secureStore.getItem("accessToken");
+          const { data } = await axiosInstance.get(`/friends/list`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+
+          if (isActive) setFriends(data.friends);
+        } catch (error) {
+          console.log("Error cargando amigos:", error);
+        }
       };
 
-      gettingPokemon();
-    } catch (error) {
-    } finally {
-    }
-  }, []);
+      loadFriends();
+
+      return () => {
+        isActive = false;
+      };
+    }, [])
+  );
 
   const sendFriendRequest = (idValue: string) => {
     const gettingRequests = async () => {
@@ -124,18 +182,38 @@ export default function Amigos() {
         <Text className="text-white text-2xl font-bold">Lista de Amigos</Text>
 
         <GlobalButton
-          className="bg-black border border-red-600 px-4 py-2 rounded-xl"
+          className="bg-black border border-red-600 p-4 rounded-full overflow-visible"
           onPress={() => router.push("/solicitudes")}
         >
-          <Text className="text-red-600 font-semibold">Solicitudes</Text>
+          <Text className="text-red-600 font-semibold">
+            <Feather name="bell" size={26} />
+          </Text>
+          {requests.length + tradeRequests.length > 0 && (
+            <View className="absolute -top-2 -right-2 bg-yellow-500 h-7 w-7 rounded-full items-center justify-center">
+              <Text className="text-black font-bold text-base leading-none">
+                {requests.length + tradeRequests.length}
+              </Text>
+            </View>
+          )}
         </GlobalButton>
       </View>
 
       {/* FRIEND LIST */}
-      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-        {friends.length == 0 && <Text>No tienes amigos</Text>}
-        {friends &&
-          friends?.map((f) => {
+      <ScrollView
+        className="flex-1"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 120 }}
+      >
+        {isLoading ? (
+          <Text className="text-white text-center mt-4 text-lg">
+            Cargando amigos...
+          </Text>
+        ) : friends.length === 0 ? (
+          <Text className="text-white text-center mt-4 text-lg">
+            No tienes amigos
+          </Text>
+        ) : (
+          friends.map((f) => {
             const shortId = f.id
               ? `${f.id.slice(0, 4)}...${f.id.slice(-4)}`
               : "";
@@ -145,14 +223,14 @@ export default function Amigos() {
                 key={f.id}
                 className="bg-black border border-red-600 rounded-3xl px-4 py-4 mb-4 flex-row justify-between items-center"
               >
-                {/* IZQUIERDA: imagen + info */}
+                {/* IZQUIERDA */}
                 <View className="flex-row items-center">
                   <Image
-                    source={
-                      f.img || {
-                        uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRUSeONpWEdtwCAskidQnoPr7sAHmNWmbnnHw&s",
-                      }
-                    }
+                    source={{
+                      uri:
+                        f.img ||
+                        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRUSeONpWEdtwCAskidQnoPr7sAHmNWmbnnHw&s",
+                    }}
                     className="w-16 h-16 rounded-full border-2 border-red-600 mr-4"
                   />
 
@@ -160,27 +238,26 @@ export default function Amigos() {
                     <Text className="text-white text-lg font-bold">
                       {f.username}
                     </Text>
-
-                    <Text className="text-gray-700 text-sm font-bold">
+                    <Text className="text-gray-500 text-sm font-bold">
                       {shortId}
                     </Text>
-
                     <Text className="text-red-600">
                       Último capturado: {f.last_captured}
                     </Text>
                   </View>
                 </View>
 
-                {/* DERECHA: botón borrar */}
+                {/* MENÚ */}
                 <GlobalButton
-                  onPress={() => confirmDelete(f.id)}
+                  onPress={() => setSelectedFriend(f)}
                   className="w-10 h-10 bg-transparent items-center justify-center"
                 >
-                  <Feather name="trash-2" size={24} color="#ff4444" />
+                  <Feather name="menu" size={26} color="#fff" />
                 </GlobalButton>
               </View>
             );
-          })}
+          })
+        )}
       </ScrollView>
 
       {/* BOTÓN AGREGAR AMIGO */}
@@ -249,6 +326,64 @@ export default function Amigos() {
             onScanned={(value) => sendFriendRequest(value)}
             onClose={() => setShowScanner(false)}
           />
+        </View>
+      )}
+
+      {/* MENU DE OPCIONES */}
+      {selectedFriend && (
+        <View className="absolute inset-0 bg-black/60 justify-center items-center z-50 px-10">
+          <View className="bg-black border-2 border-red-600 rounded-3xl w-96 py-6 px-6">
+            {/* TÍTULO */}
+            <Text className="text-white text-xl font-bold text-center mb-4">
+              Opciones de {selectedFriend.username}
+            </Text>
+
+            {/* Ver Pokémon */}
+            <GlobalButton
+              className="py-3 flex-row items-center gap-3 border-b border-red-700"
+              onPress={() => {
+                router.push(`/pokemon_amigo/${selectedFriend.id}`);
+                setSelectedFriend(null);
+              }}
+            >
+              <Feather name="eye" size={22} color="white" />
+              <Text className="text-white text-lg font-bold">Ver Pokémon</Text>
+            </GlobalButton>
+
+            {/* Intercambiar */}
+            <GlobalButton
+              className="py-3 flex-row items-center gap-3 border-b border-red-700"
+              onPress={() => {
+                router.push(`/intercambio/${selectedFriend.id}`);
+                setSelectedFriend(null);
+              }}
+            >
+              <Feather name="repeat" size={22} color="white" />
+              <Text className="text-white text-lg font-bold">Intercambiar</Text>
+            </GlobalButton>
+
+            {/* Eliminar */}
+            <GlobalButton
+              className="py-3 flex-row items-center gap-3"
+              onPress={() => {
+                confirmDelete(selectedFriend.id);
+                setSelectedFriend(null);
+              }}
+            >
+              <Feather name="trash-2" size={22} color="#ff4444" />
+              <Text className="text-red-500 text-lg font-bold">Eliminar</Text>
+            </GlobalButton>
+
+            {/* Botón cerrar */}
+            <GlobalButton
+              onPress={() => setSelectedFriend(null)}
+              className="bg-red-800 border border-red-600 w-full py-3 rounded-xl mt-6"
+            >
+              <Text className="text-center text-white font-bold text-lg">
+                Cerrar
+              </Text>
+            </GlobalButton>
+          </View>
         </View>
       )}
     </View>

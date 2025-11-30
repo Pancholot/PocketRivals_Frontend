@@ -44,7 +44,13 @@ const PokemonCard = ({ pokemon }) => {
     flex-col mx-4 my-2 rounded-lg h-64 shadow-md ${theme} overflow-hidden
   `}
       onPress={() => {
-        router.replace(`stats/${pokemon.pokedex_number}`);
+        if (pokemon.friendId) {
+          router.push(
+            `/stats/${pokemon.pokedex_number}?from=amigo&friendId=${pokemon.friendId}`
+          );
+        } else {
+          router.push(`/stats/${pokemon.pokedex_number}?from=propio`);
+        }
       }}
     >
       <View className="flex-1 justify-center items-center p-4">
