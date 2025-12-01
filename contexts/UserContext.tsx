@@ -18,7 +18,6 @@ export const UserProvider = ({ children }) => {
     try {
       let token = await secureStore.getItem("accessToken");
 
-      // ⏳ Espera a que el token se cargue bien
       let retries = 5;
       while (!token && retries > 0) {
         await new Promise((res) => setTimeout(res, 200));

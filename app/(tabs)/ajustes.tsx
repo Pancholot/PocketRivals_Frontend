@@ -22,7 +22,6 @@ export default function Ajustes() {
     }
   }, []);
 
-  // 🚀 ESTE BLOQUE ES LA SOLUCIÓN
   if (!user) {
     return <Text style={{ color: "white", marginTop: 50 }}>Cargando...</Text>;
   }
@@ -181,8 +180,12 @@ export default function Ajustes() {
               ID: {shortId}
             </Text>
           </View>
+
           <GlobalButton
-            onPress={() => Clipboard.setStringAsync(user?.id)}
+            onPress={async () => {
+              await Clipboard.setStringAsync(user?.id);
+              Alert.alert("Copiado", "El ID ha sido copiado al portapapeles.");
+            }}
             className="w-10 h-10 items-center justify-center p-0"
           >
             <Feather name="copy" size={32} color="white" />

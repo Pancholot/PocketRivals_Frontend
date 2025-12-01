@@ -8,10 +8,6 @@ export default function TabsLayout() {
     require("@/assets/icons/pokemon.png"),
     require("@/assets/icons/pokeball.png"),
     require("@/assets/icons/amigos.png"),
-    require("@/assets/icons/profilePic.png"),
-    require("@/assets/icons/profilePic2.png"),
-    require("@/assets/icons/profilePic3.png"),
-    require("@/assets/icons/profilePic4.png"),
     require("@/assets/videos/pokemonRivals.mp4"),
   ]);
 
