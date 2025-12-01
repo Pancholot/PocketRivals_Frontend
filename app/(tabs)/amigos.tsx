@@ -334,6 +334,16 @@ export default function Amigos() {
             onScanned={(value) => sendFriendRequest(value)}
             onClose={() => setShowScanner(false)}
           />
+
+          {/* BOTÓN PARA SALIR DEL ESCÁNER */}
+          <View className="absolute bottom-16 w-full items-center">
+            <GlobalButton
+              onPress={() => setShowScanner(false)}
+              className="bg-red-700 border border-red-600 px-8 py-3 rounded-xl"
+            >
+              <Text className="text-white font-bold text-lg">Salir</Text>
+            </GlobalButton>
+          </View>
         </View>
       )}
 
