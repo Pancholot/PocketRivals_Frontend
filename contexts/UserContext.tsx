@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { secureStore } from "functions/secureStore";
 import { jwtDecode } from "jwt-decode";
+import axiosInstance from "api/axiosInstance";
 
 interface AuthContextType {
   user: any;
@@ -12,15 +13,37 @@ const UserContext = createContext<AuthContextType | null>(null);
 
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+
   const loadUserFromToken = async () => {
     try {
-      const token = await secureStore.getItem("accessToken");
-      if (!token) return;
+      let token = await secureStore.getItem("accessToken");
 
-      const decoded = jwtDecode(token);
-      setUser(decoded);
+      // ⏳ Espera a que el token se cargue bien
+      let retries = 5;
+      while (!token && retries > 0) {
+        await new Promise((res) => setTimeout(res, 200));
+        token = await secureStore.getItem("accessToken");
+        retries--;
+      }
+
+      if (!token) {
+        console.log("TOKEN NOT FOUND AFTER RETRIES");
+        return;
+      }
+
+      const decoded: any = jwtDecode(token);
+
+      const { data } = await axiosInstance.get(`/player/${decoded.sub}`);
+
+      console.log("USER LOADED FROM API:", data);
+
+      setUser({
+        id: data.id,
+        username: data.username,
+        profile_picture: data.profile_picture ?? "default.png",
+      });
     } catch (e) {
-      console.log("Error loading token:", e);
+      console.log("LOAD USER ERROR:", e);
     }
   };
 

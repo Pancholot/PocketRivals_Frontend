@@ -3,12 +3,29 @@ import axiosInstance from "./axiosInstance";
 import { secureStore } from "functions/secureStore";
 import { jwtDecode } from "jwt-decode";
 
-const logIn = async (credentials: { email: string; password: string }) => {
+const logIn = async (
+  credentials: { email: string; password: string },
+  setUser: (u: any) => void
+) => {
   try {
     const response = await axiosInstance.post("/login", credentials);
-    const { access_token, user } = response.data;
+
+    const { access_token } = response.data;
+
+    // Guardar token
     await secureStore.setItem("accessToken", access_token);
-    return { ok: true, access_token, user };
+
+    // 🔥 DECODIFICAR TOKEN
+    const decoded: any = jwtDecode(access_token);
+
+    // 🔥 ACTUALIZAR CONTEXTO INMEDIATAMENTE
+    setUser({
+      id: decoded.sub,
+      username: decoded.user,
+      profile_picture: decoded.profile_picture ?? "default.png",
+    });
+
+    return { ok: true, access_token };
   } catch (error) {
     if (error instanceof AxiosError) {
       console.error(

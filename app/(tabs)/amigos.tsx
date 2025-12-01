@@ -39,6 +39,15 @@ export default function Amigos() {
     ]);
   };
 
+  const avatarMap: Record<string, any> = {
+    "Greninja.png": require("@/assets/icons/Greninja.png"),
+    "Kabutops.png": require("@/assets/icons/Kabutops.png"),
+    "Kingler.png": require("@/assets/icons/Kingler.png"),
+    "default.png": require("@/assets/icons/default.png"),
+    "Psyduck.png": require("@/assets/icons/Psyduck.png"),
+    "Wooper.png": require("@/assets/icons/Wooper.png"),
+  };
+
   useEffect(() => {
     const gettingRequests = async () => {
       try {
@@ -226,12 +235,11 @@ export default function Amigos() {
                 {/* IZQUIERDA */}
                 <View className="flex-row items-center">
                   <Image
-                    source={{
-                      uri:
-                        f.img ||
-                        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRUSeONpWEdtwCAskidQnoPr7sAHmNWmbnnHw&s",
-                    }}
+                    source={
+                      avatarMap[f.profile_picture] || avatarMap["default.png"]
+                    }
                     className="w-16 h-16 rounded-full border-2 border-red-600 mr-4"
+                    resizeMode="cover"
                   />
 
                   <View>

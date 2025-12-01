@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { View, Text } from "react-native";
-import GlobalButton from "./GlobalButton"; // ajusta la ruta si es necesario
+import GlobalButton from "@/components/GlobalButton";
 
 export default function TradeAcceptedNotification({
   message,
@@ -20,14 +20,18 @@ export default function TradeAcceptedNotification({
   if (!message) return null;
 
   return (
-    <View className="absolute top-24 left-5 right-5 p-4 rounded-2xl bg-black/80 border border-green-500 z-50">
-      <Text className="text-white text-center mb-3 text-base">{message}</Text>
+    <View className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-4 w-80 rounded-xl bg-black/80 border-2 border-green-600 z-50">
+      {/* Mensaje */}
+      <Text className="text-white text-center text-base mb-3 font-medium">
+        {message}
+      </Text>
 
+      {/* Botón OK centrado */}
       <GlobalButton
         onPress={onClose}
-        className="bg-green-600 px-4 py-2 rounded-xl"
+        className="bg-green-800 border-2 border-green-600 py-2 px-6 rounded-lg mx-auto"
       >
-        <Text className="text-white font-bold">OK</Text>
+        <Text className="text-white font-bold text-lg">OK</Text>
       </GlobalButton>
     </View>
   );

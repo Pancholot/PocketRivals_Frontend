@@ -235,7 +235,7 @@ export default function Capturar() {
         });
       }, 5000);
 
-      // 🔥 Después de 14 segundos, terminamos animación global
+      // Después de 9 segundos, terminamos animación global
       setTimeout(() => {
         setIsAnimating(false);
 
@@ -258,7 +258,7 @@ export default function Capturar() {
     pokeballOpacity.setValue(1);
     pokemonScale.setValue(0);
 
-    // ⏳ Iniciar cooldown + contador
+    // Iniciar cooldown + contador
     setIsCooldown(true);
     setCooldownTimeLeft(COOLDOWN_TIME / 1000); // segundos
 
@@ -334,9 +334,10 @@ export default function Capturar() {
               <Text
                 className="
                   absolute 
-                  -top-10
+                  -top-4
                   left-1/2 
-                  -translate-x-1/2
+                  -translate-x-1/2 
+                  -translate-y-[70%]
                   text-5xl 
                   font-extrabold 
                   text-amber-400 

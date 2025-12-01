@@ -4,7 +4,7 @@ type Friend = {
   id: string;
   username: string;
   last_captured: string;
-  img: any;
+  profile_picture: string;
 };
 
 type FriendsContextType = {

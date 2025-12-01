@@ -4,14 +4,14 @@
     "slug": "pokemon-rivals",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/icons/Logo.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "scheme": "pokemon-rivals",
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/icons/Logo.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#FF0000"
     },
     "ios": {
       "supportsTablet": true
@@ -24,7 +24,7 @@
       "edgeToEdgeEnabled": true
     },
     "web": {
-      "favicon": "./assets/favicon.png",
+      "favicon": "./assets/icons/Logo.png",
       "bundler": "metro"
     },
     "plugins": [

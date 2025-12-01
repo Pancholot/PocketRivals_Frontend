@@ -30,11 +30,16 @@ export default function Intercambio() {
   const [loading, setLoading] = useState(true);
   const [myOutgoingTrades, setMyOutgoingTrades] = useState([]);
   const lockedIds = myOutgoingTrades.map((t) => t.requester_pokemon_id);
+  const lockedFriendIds = friendPokemon.map((p) => (p.locked ? p.id : null));
+  const allLockedIds = [...lockedIds, ...lockedFriendIds.filter((id) => id)];
   const myPokemonWithLock = myPokemon.map((p) => ({
     ...p,
-    locked: lockedIds.includes(p.id),
+    locked: allLockedIds.includes(p.id),
   }));
-  const availablePokemon = myPokemon.filter((p) => !lockedIds.includes(p.id));
+  const friendPokemonWithLock = friendPokemon.map((p) => ({
+    ...p,
+    locked: allLockedIds.includes(p.id),
+  }));
 
   useEffect(() => {
     const loadMyTrades = async () => {
@@ -56,17 +61,35 @@ export default function Intercambio() {
       try {
         const token = await secureStore.getItem("accessToken");
 
+        // Cargar los Pokémon de tu usuario
         const myRes = await axiosInstance.get("/pokemon/users_pokemon", {
           headers: { Authorization: `Bearer ${token}` },
         });
 
+        // Cargar los Pokémon de tu amigo
         const friendRes = await axiosInstance.get(
           `/pokemon/public_users_pokemon/${friendId}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
+        // Obtener los Pokémon bloqueados de tu amigo
+        const blockedRes = await axiosInstance.get(
+          `/trade/blocked_pokemon/${friendId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        const blockedIds = blockedRes.data.blocked_pokemon_ids;
+
+        setFriendPokemon(
+          friendRes.data.map((pokemon) => ({
+            ...pokemon,
+            locked: blockedIds.includes(pokemon.id),
+          }))
+        );
+
         setMyPokemon(myRes.data);
-        setFriendPokemon(friendRes.data);
       } catch (error) {
         console.log(error);
         Alert.alert("Error", "No se pudieron cargar los Pokémon.");
@@ -76,7 +99,7 @@ export default function Intercambio() {
     };
 
     load();
-  }, []);
+  }, [friendId]);
 
   const sendTrade = async () => {
     if (!selectedMine || !selectedTheirs) {
@@ -167,7 +190,7 @@ export default function Intercambio() {
 
         <PokemonDropdown
           label="A cambio de:"
-          data={friendPokemon}
+          data={friendPokemonWithLock}
           selected={selectedTheirs}
           open={openTheirs}
           setOpen={setOpenTheirs}

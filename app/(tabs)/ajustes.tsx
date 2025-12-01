@@ -3,7 +3,6 @@ import QRCode from "@/components/QRCode";
 import * as Clipboard from "expo-clipboard";
 import { Feather } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
-import ScanQR from "@/components/scanQR";
 import { useMusic } from "contexts/MusicContext";
 import { useRouter } from "expo-router";
 import EditNameModal from "@/components/EditNameModal";
@@ -16,23 +15,45 @@ import { useUser } from "contexts/UserContext";
 
 export default function Ajustes() {
   const { user, setUser, loadUserFromToken } = useUser();
+
   useEffect(() => {
     if (!user) {
       loadUserFromToken();
     }
-  }, [user]);
+  }, []);
 
-  const username = user?.username ?? "";
-  const [editingName, setEditingName] = useState(false);
+  // 🚀 ESTE BLOQUE ES LA SOLUCIÓN
+  if (!user) {
+    return <Text style={{ color: "white", marginTop: 50 }}>Cargando...</Text>;
+  }
 
-  const userId = user?.id ?? "";
-  const shortId = userId ? `${userId.slice(0, 4)}...${userId.slice(-4)}` : "";
-
-  const profileImage = require("@/assets/icons/profilePic.png");
+  // Ahora sí user existe
+  const username = user.username;
+  const userId = user.id;
+  const shortId = `${userId.slice(0, 4)}...${userId.slice(-4)}`;
   const { isPlaying, playMusic, stopMusic } = useMusic();
   const router = useRouter();
 
+  const [editingName, setEditingName] = useState(false);
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
+
+  const avatarMap: Record<string, any> = {
+    "Greninja.png": require("@/assets/icons/Greninja.png"),
+    "Kabutops.png": require("@/assets/icons/Kabutops.png"),
+    "Kingler.png": require("@/assets/icons/Kingler.png"),
+    "default.png": require("@/assets/icons/default.png"),
+    "Psyduck.png": require("@/assets/icons/Psyduck.png"),
+    "Wooper.png": require("@/assets/icons/Wooper.png"),
+  };
+
+  const avatarOptions = [
+    require("@/assets/icons/Greninja.png"),
+    require("@/assets/icons/Kabutops.png"),
+    require("@/assets/icons/Kingler.png"),
+    require("@/assets/icons/default.png"),
+    require("@/assets/icons/Psyduck.png"),
+    require("@/assets/icons/Wooper.png"),
+  ];
 
   const updateUsername = async (newUsername: string) => {
     try {
@@ -47,13 +68,10 @@ export default function Ajustes() {
           },
         }
       );
-      // Actualizar el contexto del usuario
-      setUser((prev) => ({ ...prev, username: newUsername }));
 
+      setUser((prev) => ({ ...prev, username: newUsername }));
       Alert.alert("Éxito", "Tu nombre de usuario ha sido actualizado.");
     } catch (error: any) {
-      console.error("Error actualizando username:", error);
-
       Alert.alert(
         "Error",
         error?.response?.data?.message || "No se pudo actualizar el usuario."
@@ -61,19 +79,47 @@ export default function Ajustes() {
     }
   };
 
-  const copyIDToClipboard = async () => {
-    Clipboard.setStringAsync(userId);
-    Alert.alert("¡Copiado!", "Tu ID ha sido copiado al portapapeles.");
+  const updateProfilePicture = async (newPicture: string) => {
+    try {
+      const token = await secureStore.getItem("accessToken");
+
+      // Actualiza la foto de perfil en el backend
+      await axiosInstance.put(
+        "/player/change_profile_picture",
+        { profile_picture: newPicture },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setUser((prev) => ({ ...prev, profile_picture: newPicture }));
+
+      Alert.alert("Éxito", "Tu foto de perfil ha sido actualizada.");
+    } catch (error: any) {
+      Alert.alert(
+        "Error",
+        error?.response?.data?.message || "No se pudo actualizar la foto."
+      );
+    }
   };
 
-  const avatarOptions = Array(6).fill(require("@/assets/icons/profilePic.png"));
+  console.log("DEBUG FOTO AJUSTES:", user?.profile_picture);
+
+  const profileKey = user?.profile_picture ?? "default.png";
+  const profileImage = avatarMap[profileKey] || avatarMap["default.png"];
+
+  console.log("USER CONTEXT:", user);
+  console.log("DEBUG FOTO AJUSTES KEY:", profileKey);
+  console.log("DEBUG FOTO AJUSTES IMG:", profileImage);
 
   return (
     <SafeAreaView className="flex-1 bg-red-800 pt-16">
       <View className="flex-1 items-center justify-start bg-red-800 px-6">
         <View className="w-full flex-row justify-between items-center mb-16">
           <View className="w-20 h-20 bg-gray-800 rounded-full items-center justify-center">
-            {/* Foto de Perfil */}
+            {/* FOTO DE PERFIL */}
             <GlobalButton onPress={() => setShowAvatarPicker(true)}>
               <Image
                 source={profileImage}
@@ -83,7 +129,7 @@ export default function Ajustes() {
             </GlobalButton>
           </View>
 
-          {/* Log out */}
+          {/* LOGOUT */}
           <GlobalButton
             className="border bg-black border-red-600 px-4 py-2 rounded-xl"
             onPress={() => {
@@ -100,16 +146,16 @@ export default function Ajustes() {
           </GlobalButton>
         </View>
 
-        {/* Código QR */}
+        {/* QR */}
         <View className="w-72 h-72 rounded-3xl overflow-hidden border-4 border-white items-center justify-center mb-4">
-          {userId && userId.length > 0 ? (
+          {userId ? (
             <QRCode value={userId} />
           ) : (
             <Text className="text-white">Cargando ID...</Text>
           )}
         </View>
 
-        {/* Nombre de Usuario */}
+        {/* NOMBRE */}
         <View className="items-center mb-5 flex-row">
           <Text className="text-white text-xl font-bold mr-2">{username}</Text>
 
@@ -118,7 +164,6 @@ export default function Ajustes() {
           </GlobalButton>
         </View>
 
-        {/* Modal de edición */}
         <EditNameModal
           visible={editingName}
           currentName={username}
@@ -129,7 +174,7 @@ export default function Ajustes() {
           }}
         />
 
-        {/* ID y para Copiar la misma */}
+        {/* ID */}
         <View className="flex-row items-center mb-4 pl-6">
           <View className="bg-black border border-red-600 px-5 py-3 rounded-2xl mr-3 items-center">
             <Text className="text-red-600 font-semibold mt-1">
@@ -137,19 +182,16 @@ export default function Ajustes() {
             </Text>
           </View>
           <GlobalButton
-            onPress={copyIDToClipboard}
+            onPress={() => Clipboard.setStringAsync(user?.id)}
             className="w-10 h-10 items-center justify-center p-0"
           >
             <Feather name="copy" size={32} color="white" />
           </GlobalButton>
         </View>
 
-        {/* Botón Música */}
+        {/* BOTÓN MÚSICA */}
         <GlobalButton
-          onPress={() => {
-            if (isPlaying) stopMusic();
-            else playMusic();
-          }}
+          onPress={() => (isPlaying ? stopMusic() : playMusic())}
           className="bg-black border border-red-600 w-56 py-3 rounded-xl mt-4"
         >
           <Text className="text-center text-red-600 font-bold">
@@ -158,22 +200,30 @@ export default function Ajustes() {
         </GlobalButton>
       </View>
 
-      {/* POP-OFF PARA ELEGIR AVATAR */}
+      {/* POP-OFF SELECCIÓN DE AVATAR */}
       {showAvatarPicker && (
         <View className="absolute inset-0 bg-black/60 justify-center items-center z-50 px-10">
           <View className="bg-black border-2 border-red-600 rounded-3xl w-96 py-6 px-6">
-            {/* TÍTULO */}
             <Text className="text-white text-xl font-bold text-center mb-6">
               Selecciona tu foto de perfil
             </Text>
 
-            {/* 6 AVATARES */}
             <View className="flex-row flex-wrap justify-center gap-4 mb-4">
               {avatarOptions.map((avatar, index) => (
                 <GlobalButton
                   key={index}
                   onPress={() => {
-                    console.log("Elegiste avatar #", index + 1);
+                    const avatarNames = [
+                      "Greninja.png",
+                      "Kabutops.png",
+                      "Kingler.png",
+                      "default.png",
+                      "Psyduck.png",
+                      "Wooper.png",
+                    ];
+
+                    const selectedPicture = avatarNames[index];
+                    updateProfilePicture(selectedPicture);
                     setShowAvatarPicker(false);
                   }}
                   className="w-20 h-20 rounded-full overflow-hidden border-2 border-red-700"
@@ -187,7 +237,6 @@ export default function Ajustes() {
               ))}
             </View>
 
-            {/* Botón cerrar */}
             <GlobalButton
               onPress={() => setShowAvatarPicker(false)}
               className="bg-red-800 border border-red-600 w-full py-3 rounded-xl mt-4"

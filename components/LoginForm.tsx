@@ -63,15 +63,10 @@ export default function LoginForm({ setFormType }) {
 
     try {
       console.log("Logging in with", { email, password });
-      const message = await logIn({ email, password });
+
+      const message = await logIn({ email, password }, setUser);
 
       if (message.ok) {
-        const decoded = jwtDecode(message.access_token);
-        setUser({
-          id: decoded.sub,
-          username: decoded.user,
-        });
-
         router.replace("/capturar");
       } else {
         Alert.alert("Inicio de sesión fallido");

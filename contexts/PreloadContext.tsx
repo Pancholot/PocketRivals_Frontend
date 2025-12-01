@@ -15,6 +15,12 @@ export const PreloadProvider = ({ children }) => {
         require("@/assets/icons/amigos.png"),
         require("@/assets/icons/pokemon.png"),
         require("@/assets/icons/settings.png"),
+        require("@/assets/icons/default.png"),
+        require("@/assets/icons/Greninja.png"),
+        require("@/assets/icons/Kabutops.png"),
+        require("@/assets/icons/Kingler.png"),
+        require("@/assets/icons/Psyduck.png"),
+        require("@/assets/icons/Wooper.png"),
       ];
 
       const cacheImages = images.map((img) =>
